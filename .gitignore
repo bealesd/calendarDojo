@@ -1,10 +1,1 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/css
-/dojo-release-1.14.2
-/fonts
-/jquery
-/js
-/.vs
+﻿/.vs
