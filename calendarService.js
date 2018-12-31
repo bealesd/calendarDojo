@@ -26,7 +26,6 @@ class CalendarService {
         this.calendarTimer.startGetCalendarTimer();
         return new Promise(function (res, rej) {
             this.calendarRepo.getData().then(function(result) {
-                console.log(result);
                 this.calendarJson = result;
                 this.setCalendarEventsForCurrentMonth();
                 this.calendarTimer.stopGetCalendarTimer();
@@ -41,24 +40,39 @@ class CalendarService {
     }
 
     setCalendarEventsForCurrentMonth() {
-        this.currentMonthCalendarArray = new Array();
+        this.currentMonthCalendarArray = {};
+        this.eventsPerDay = {};
+
         for (var i = 0; i < this.calendarJson.length; i++) {
             var date = new Date();
             date.setFullYear(this.calendarJson[i].date.split('/')[0], this.calendarJson[i].date.split('/')[1] - 1, this.calendarJson[i].date.split('/')[2]);
             if (date.getFullYear() === this.dateHelper.getYear() && date.getMonth() === this.dateHelper.getMonthNumber()) {
+
+                if (this.eventsPerDay[date.getDate()] === undefined) {
+                    this.eventsPerDay[date.getDate()] = 1;
+                }
+                else {
+                    this.eventsPerDay[date.getDate()] += 1;
+                }
+
                 var calendarEvent = {
-                    "id": this.calendarJson[i].id,
-                    "title": this.calendarJson[i].title,
-                    "time": this.calendarJson[i].time,
-                    "who": this.calendarJson[i].who,
-                    "where": this.calendarJson[i].where,
+                    'id': this.calendarJson[i].id,
+                    'title': this.calendarJson[i].title,
+                    'time': this.calendarJson[i].time,
+                    'who': this.calendarJson[i].who,
+                    'where': this.calendarJson[i].where,
+                    'day': date.getDate(),
+                    'slot': this.eventsPerDay[date.getDate()]
                 };
-                if (!this.currentMonthCalendarArray[`${date.getDate()}`]) this.currentMonthCalendarArray[`${date.getDate()}`] = [calendarEvent];
-                else this.currentMonthCalendarArray[`${date.getDate()}`].push(calendarEvent);
+                var id = JSON.stringify({
+                    day: date.getDate(),
+                    slot: this.eventsPerDay[date.getDate()]
+                });
+                this.currentMonthCalendarArray[this.calendarJson[i].id] = calendarEvent;
             }
         }
         this.drawCalendarService.calendarArray = this.currentMonthCalendarArray;
-        this.sortCalendarEvents();
+        //this.sortCalendarEvents();
     }
 
     sortCalendarEvents() {
@@ -76,7 +90,7 @@ class CalendarService {
             this.dateHelper.getTodaysDate().month === this.dateHelper.getMonthNumber() &&
             this.dateHelper.getTodaysDate().year === this.dateHelper.getYear()) {
             this.drawCalendarService.highlightCurrentDay(this.dateHelper.getTodaysDate().day);
-        };
+        }
 
         this.drawCalendarService.updateCalendarColors();
         this.drawCalendarService.setMonthAndYearText(this.dateHelper.getMonthNumber(), this.dateHelper.getMonthName(), this.dateHelper.getYear());

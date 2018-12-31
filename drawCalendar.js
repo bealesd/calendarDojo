@@ -23,10 +23,7 @@ class DrawCalendar {
         calendarContainer.style.marginLeft = `${gutter}px`;
     }
 
-    setColors() {
-        var neonColors = ['#FF355E', '#FF6037', '	#FFCC33', '#66FF66', '#50BFE6', '#FF00CC'];
-        this.colors = neonColors;
-    }
+    setColors() { this.colors = ['#FF355E', '#FF6037', '	#FFCC33', '#66FF66', '#50BFE6', '#FF00CC']; }
 
     setMonthAndYearText(month, monthName, year) {
         document.getElementById("date").innerHTML = `${monthName}  ${year}`;
@@ -40,28 +37,23 @@ class DrawCalendar {
         var refNode = document.getElementById('calendarContainer');
         var style = `style='height:${this.calculateBlockHeight()}px;'`;
         var node = '';
-        for (var day = 1; day <= this.daysInMonth; day++) {
-            if (this.calendarArray[day]) {
-                var calendarDayRows = "";
-                for (var slot = 0; slot < this.calendarArray[day].length; slot++) {
-                    var calendarEvent = this.calendarArray[day][slot];
-                    calendarDayRows += this.createCalendarDayRow(calendarEvent);
-                }
 
-                var calendarDayTable = `<table>${calendarDayRows}</table>`;
-                node = `<div class='block' ${style}><p class='add' id='${day}'>${day} - ${dayNames[day]}</p>${calendarDayTable}</div>`;
-            }
-            else {
-                node = `<div class='block' ${style}><p class='add' id='${day}'>${day} - ${dayNames[day]}</p></div>`;
-            }
+        for (var day = 1; day <= this.daysInMonth; day++) {
+            node = `<div id='${day}' class='block' ${style}><p class='add'>${day} - ${dayNames[day]}</p><table><tbody></tbody></table></div>`;
             refNode.innerHTML += node;
         }
+
+        var keys = Object.keys(this.calendarArray);
+        for (var i = 0; i < keys.length; i++) {
+            var calendarEvent = this.calendarArray[keys[i]];
+            var dayRow = this.createCalendarDayRow(calendarEvent);
+            document.querySelector(`[id='${calendarEvent.day}'] tbody`).innerHTML += dayRow;
+        }
+
         this.setColors();
     }
-    highlightCurrentDay(day) {
-        console.log(day);
-        document.getElementById(`${day}`).parentElement.classList.add('highlightBlock');
-    }
+
+    highlightCurrentDay(day) { document.getElementById(`${day}`).classList.add('highlightBlock'); }
 
     calculateBlockHeight() {
         var maxRowCount = 0;
@@ -78,11 +70,10 @@ class DrawCalendar {
     }
 
     createCalendarDayRow(calendarEvent) {
-        return `<tr hidden><td class="calendarEventGuid">${calendarEvent.id}</td></tr>
-                <tr><td class="calendarEventTitle">${WebTimeHelper.webTimeToString(calendarEvent.time)}&nbsp<em>${calendarEvent.title}</em>
+        return `<tr><td class="calendarEventTitle" id='${calendarEvent.id}'>
+                ${WebTimeHelper.webTimeToString(calendarEvent.time)}&nbsp<em>${calendarEvent.title}</em>
                 </td></tr>`;
     }
-
 
     updateCalendarColors() {
         let calendarColumns = this.countCalendarColumns();
@@ -100,7 +91,7 @@ class DrawCalendar {
     setCalendarColors(daysInMonth, colors) {
         for (var i = 0; i < daysInMonth; i++) {
             var node = document.getElementById(`${i + 1}`);
-            node.parentNode.style.border = `3px solid ${colors[i % colors.length]}`;
+            node.style.border = `3px solid ${colors[i % colors.length]}`;
         }
     }
 
