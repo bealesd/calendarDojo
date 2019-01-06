@@ -5,14 +5,11 @@ class CalendarService {
         this.dateHelper = null;
         this.calendarRepo = null;
         this.calendarTimer = null;
-        //properties
-        this.currentMonthCalendarArray = null;
-        this.calendarJson = null;
     }
 
     post(title, time, who, where, id) {
         console.log(`post for '${title}' with id: '${id}'`);
-        return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, getJson().day);
+        return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getJson().day);
         //    .then(() => {
         //    console.log(`Inserted or updated calendar event: ${title}, id: ${id}`);
         //}
@@ -22,63 +19,71 @@ class CalendarService {
         return this.calendarRepo.deleteData(id);
     }
 
-    get() {
+    get() {//TODO: rename to start calendar, it gets and controls timer
         this.calendarTimer.startGetCalendarTimer();
         return new Promise(function (res, rej) {
-            this.calendarRepo.getData().then(function(result) {
-                this.calendarJson = result;
-                this.setCalendarEventsForCurrentMonth();
+            this.calendarRepo.getData().then(function (results) {
+                DataStore.addJson({ allCalendarRecords: results });
+                this.setCalendarEventsForCurrentMonth(results);
                 this.calendarTimer.stopGetCalendarTimer();
-                res(`'getData' retrieved: ${result.length} calendar events.`);
-            }.bind(this), function(err) {
+                res(`'getData' retrieved: ${results.length} calendar events.`);
+            }.bind(this), function (err) {
                 this.calendarTimer.stopGetCalendarTimer();
                 this.calendarTimer.setCalendarStatusText('Could not get calendar data.');
                 rej(err);
-                });
+            });
 
         }.bind(this));
     }
 
-    setCalendarEventsForCurrentMonth() {
-        this.currentMonthCalendarArray = {};
-        this.eventsPerDay = {};
-
-        for (var i = 0; i < this.calendarJson.length; i++) {
-            var date = new Date();
-            date.setFullYear(this.calendarJson[i].date.split('/')[0], this.calendarJson[i].date.split('/')[1] - 1, this.calendarJson[i].date.split('/')[2]);
-            if (date.getFullYear() === this.dateHelper.getYear() && date.getMonth() === this.dateHelper.getMonthNumber()) {
-
-                if (this.eventsPerDay[date.getDate()] === undefined) {
-                    this.eventsPerDay[date.getDate()] = 1;
-                }
-                else {
-                    this.eventsPerDay[date.getDate()] += 1;
-                }
-
-                var calendarEvent = {
-                    'id': this.calendarJson[i].id,
-                    'title': this.calendarJson[i].title,
-                    'time': this.calendarJson[i].time,
-                    'who': this.calendarJson[i].who,
-                    'where': this.calendarJson[i].where,
-                    'day': date.getDate(),
-                    'slot': this.eventsPerDay[date.getDate()]
-                };
-                var id = JSON.stringify({
-                    day: date.getDate(),
-                    slot: this.eventsPerDay[date.getDate()]
-                });
-                this.currentMonthCalendarArray[this.calendarJson[i].id] = calendarEvent;
-            }
-        }
-        this.drawCalendarService.calendarArray = this.currentMonthCalendarArray;
-        //this.sortCalendarEvents();
+    parseDateFromString(dateString) {
+        var date = new Date();
+        var year = dateString.split('/')[0];
+        var month = dateString.split('/')[1] - 1;
+        var day = dateString.split('/')[2];
+        date.setFullYear(year, month, day);
+        return date;
     }
 
-    sortCalendarEvents() {
-        for (var i = 0; i < this.currentMonthCalendarArray.length; i++) {
-            if (this.currentMonthCalendarArray[i]) this.currentMonthCalendarArray[i].sort(CalendarHelper.compareCalendarEvents);
+    getCurrentMonthRecords(allCalendarRecords) {
+        var currentMonthCalendarEvents = {};
+        var eventsPerDay = {};
+        for (var i = 0; i < allCalendarRecords.length; i++) {
+            var calendarEventDate = this.parseDateFromString(allCalendarRecords[i].date);
+            var eventIsCurrentMonth = calendarEventDate.getFullYear() === this.dateHelper.getYear() && calendarEventDate.getMonth() === this.dateHelper.getMonthNumber();
+            if (eventIsCurrentMonth) {
+                if (eventsPerDay[calendarEventDate.getDate()] === undefined)
+                    eventsPerDay[calendarEventDate.getDate()] = 1;
+                else
+                    eventsPerDay[calendarEventDate.getDate()] += 1;
+
+                var calendarEvent = {
+                    'id': allCalendarRecords[i].id,
+                    'title': allCalendarRecords[i].title,
+                    'time': allCalendarRecords[i].time,
+                    'who': allCalendarRecords[i].who,
+                    'where': allCalendarRecords[i].where,
+                    'day': calendarEventDate.getDate(),
+                    'slot': eventsPerDay[calendarEventDate.getDate()]
+                };
+                currentMonthCalendarEvents[allCalendarRecords[i].id] = calendarEvent;
+            }
         }
+        return currentMonthCalendarEvents;
+    }
+
+    setCalendarEventsForCurrentMonth() {
+        var currentMonthCalendarRecords = this.getCurrentMonthRecords(DataStore.getJson()['allCalendarRecords']);
+        DataStore.addCurrentMonthCalendarRecords(this.sortCalendarEvents(currentMonthCalendarRecords));
+    }
+
+    sortCalendarEvents(calendarEventJson) {
+        var calendarEventsArray = [];
+        Object.keys(calendarEventJson).forEach(function (id) { calendarEventsArray.push(calendarEventJson[id]); });
+        calendarEventsArray.sort(CalendarHelper.compareByTime);
+        var soughtedCalendarEventJson = {};
+        calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event.id] = event; });
+        return soughtedCalendarEventJson;
     }
 
     drawCalendar() {

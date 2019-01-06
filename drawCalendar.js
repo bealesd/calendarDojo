@@ -2,24 +2,15 @@ class DrawCalendar {
     constructor() {
         this.opacity = 0.3;
         this.colors = null;
-        this.calendarArray = null;
         this.daysInMonth = null;
     }
 
     setCalendarBorder() {
         var calendarContainer = document.getElementById('calendarContainer');
-        var totalWidth = calendarContainer.parentNode.offsetWidth;
         var blockWidth = document.getElementsByClassName('block')[0].offsetWidth;
         var blockCount = this.countCalendarColumns();
         var totalBlockWidth = blockCount * blockWidth;
         var gutter = (calendarContainer.parentNode.offsetWidth - totalBlockWidth) / 2;
-        //console.log(`setCalendarBorder: ${JSON.stringify({
-        //    totalWidth: totalWidth,
-        //    columns: blockCount,
-        //    columnWidth: blockWidth,
-        //    totalBlockWidth: totalBlockWidth,
-        //    margin: gutter,
-        //})}`);
         calendarContainer.style.marginLeft = `${gutter}px`;
     }
 
@@ -27,7 +18,7 @@ class DrawCalendar {
 
     setMonthAndYearText(month, monthName, year) {
         document.getElementById("date").innerHTML = `${monthName}  ${year}`;
-        addJson({
+        DataStore.addJson({
             year: year,
             month: month
         });
@@ -43,9 +34,10 @@ class DrawCalendar {
             refNode.innerHTML += node;
         }
 
-        var keys = Object.keys(this.calendarArray);
+        var calendarArray = DataStore.getCurrentMonthCalendarRecords();
+        var keys = Object.keys(calendarArray);
         for (var i = 0; i < keys.length; i++) {
-            var calendarEvent = this.calendarArray[keys[i]];
+            var calendarEvent = calendarArray[keys[i]];
             var dayRow = this.createCalendarDayRow(calendarEvent);
             document.querySelector(`[id='${calendarEvent.day}'] tbody`).innerHTML += dayRow;
         }
@@ -56,11 +48,12 @@ class DrawCalendar {
     highlightCurrentDay(day) { document.getElementById(`${day}`).classList.add('highlightBlock'); }
 
     calculateBlockHeight() {
+        var calendarArray = DataStore.getCurrentMonthCalendarRecords();
         var maxRowCount = 0;
         for (var i = 1; i <= this.daysInMonth; i++) {
             var currentRowCount = 0;
-            if (this.calendarArray[i]) {
-                for (var j = 0; j < this.calendarArray[i].length; j++) {
+            if (calendarArray[i]) {
+                for (var j = 0; j < calendarArray[i].length; j++) {
                     currentRowCount++;
                 }
             }
@@ -95,9 +88,9 @@ class DrawCalendar {
         }
     }
 
-    clearCalendar() { document.getElementById('calendarContainer').innerHTML = ""; }
+    clearCalendar() { document.getElementById('calendarContainer').innerHTML = ""; }//TODO: register id with generic clearer
 
-    createCalendarSubMenu() {
+    createCalendarSubMenu() {//TODO: move to generic sub menu creator
         var refNode = document.getElementsByClassName('subMenu')[0];
         var height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
         var previousMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="nextMonth" onclick="calendarBackwards()"><span class="glyphicon glyphicon-menu-left"></span></a>`;

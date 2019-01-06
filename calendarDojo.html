@@ -14,6 +14,11 @@
     <script src="./calendarTimer.js" type="text/javascript"></script>
     <script src="./calendarService.js" type="text/javascript"></script>
     <script src="./eventListener.js" type="text/javascript"></script>
+    <script src="./dataStore.js" type="text/javascript"></script>
+    <script src="./customEvents.js" type="text/javascript"></script>
+    <script src="./calendarController.js" type="text/javascript"></script>
+    <script src="./menuEvents.js" type="text/javascript"></script>
+    <script src="./callbackService.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="./style.css" />
 </head>
 
@@ -46,75 +51,45 @@
         <input id="eventTime" type="time" name="when" step='900'><br>
         <input id="eventWhere" type="text" name="where" placeholder="where"><br>
         <input id="eventWho" type="text" name="who" placeholder="who"><br>
-        <button id='eventAddOrUpdateButton' type="button" onclick='createOrUpdateCalendarEvent()'>Add</button>
-        <button id='eventDelete' type="button" onclick="deleteCalendarEvent()">Delete</button>
-        <button id='eventClose' type="button" onclick="hideDialog()">Cancel</button>
+        <button id='eventAddOrUpdateButton' type="button">Add</button>
+        <button id='eventDelete' type="button">Delete</button>
+        <button id='eventClose' type="button">Cancel</button>
     </form>
 
-
     <script>
-        //#region dataStore
-        function getJson() { return document.getElementById('dataStore').value };
-
-        function addJson(newJson) {
-            var dataStore = document.getElementById('dataStore');
-            var oldJson = dataStore.value;
-            dataStore.value = updateJson(oldJson, newJson);
-        };
-
-        function updateJson(oldJson, newJson) { return Object.assign({}, oldJson, newJson); };
-        //#endregion
-
-        //#region submenu
-        function calendarSubMenuCallback() {
-            var height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
-            var previousMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="nextMonth" onclick="calendarBackwards()"><span class="glyphicon glyphicon-menu-left"></span></a>`;
-            var nextMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="previousMonth" onclick="calendarForwards()"><span class="glyphicon glyphicon-menu-right"></span></a>`;
-            createSubMenu(previousMonthHtml + nextMonthHtml);
-        };
-
-        function createSubMenu(subMenuHtml) {
-            document.getElementsByClassName('subMenu')[0].innerHTML = subMenuHtml;
-        };
-
-        this.subMenuCallbacks = [];
-
-        function registerSubMenuCallbacks(callbackFunction) {
-            this.subMenuCallbacks[callbackFunction.name] = callbackFunction;
-        };
-
-        function triggerSubMenuCallback(callbackFunction) {
-            this.subMenuCallbacks[callbackFunction]();
-        };
-
         function removeSubMenu() {
             document.getElementsByClassName('subMenu')[0].innerHTML = '';
         };
-        //#endregion
 
+        this.callbackService = CallbackService();
+        this.calendarController = new CalendarController(callbackService.registerSubMenuCallbacks, callbackService.registerTabCallbacks);
 
-        this.calendarService = new CalendarService();
-        this.calendarService.calendarRepo = new CalendarRepo();
-        this.calendarService.drawCalendarService = new DrawCalendar();
-        this.calendarService.dateHelper = new DateHelper();
-        this.calendarService.calendarTimer = new CalendarTimer();
+        this.calendarController.registerCalendarCallbacks();
         this.eventListener = new EventListener();
+        this.menuEvents = new MenuEvents();
+
+        DataStore.addJson({ currentPage: 'calendar' });
+
         this.onLoad();
-        this.onResize();
+        //this.onResize();
 
         function onLoad() {
-            window.addEventListener("load", load, false);
+            window.addEventListener("load", this.loadTab, false);
         };
 
-        function load() {
-            this.setupMenuEvents();
-            this.calendarService.get().then((result) => {
-                this.loadCalendarPage();
-            }, (err) => {
-                console.log(`Calendar could not be retrieved in ready: ${err}`);
-                //do a retry every 30 seconds
-                setTimeout(function () { /*reload*/ }, 5000);
-            });
+        function loadTab() {
+            var currentTab = document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
+            currentTab.style.backgroundColor = 'darkred';
+            var tabKeys = Object.keys(this.callbackService.getTabCallbacks());
+            console.log(this.callbackService.subMenuCallbacks);
+            for (var i = 0; i < tabKeys.length; i++) {
+                if (tabKeys[i] === currentTab.id) {
+                    removeSubMenu();
+                    this.callbackService.triggerTabCallback(tabKeys[i]);
+                    this.callbackService.triggerSubMenuCallback(tabKeys[i]);
+                }
+            }
+            this.menuEvents.setupMenuEvents();
         };
 
         function onResize() {
@@ -130,199 +105,6 @@
                 }, 66);
             }
         };
-
-        //this.eventListener.add(this.loadCalendarPage);
-        //this.eventListener.registerResizeCallbacks();
-
-        function loadCalendarPage() {
-            // draws calendar, register event listeners for calendar actions, registers events for sub menu(left and right),
-            removeSubMenu();
-            this.registerSubMenuCallbacks(this.calendarSubMenuCallback);//should be done on page load
-            this.calendarService.drawCalendar();
-            this.setCalendarEventsFormPosition();
-            this.triggerSubMenuCallback('calendarSubMenuCallback');
-            this.registerCalendarEventListeners(this.calendarService.currentMonthCalendarArray);
-            this.onSubMenuLinkHover();
-        };
-
-        function calendarForwards() {
-            this.calendarService.dateHelper.updateDate(true);
-            this.calendarService.setCalendarEventsForCurrentMonth();
-            this.loadCalendarPage();
-        };
-
-        function calendarBackwards() {
-            this.calendarService.dateHelper.updateDate(false);
-            this.calendarService.setCalendarEventsForCurrentMonth();
-            this.loadCalendarPage();
-        };
-
-        function setCalendarEventsFormPosition() {
-            var eventForm = document.getElementById('addOrEditCalendarEvents');
-            eventForm.style.left = (window.innerWidth - parseInt(eventForm.style.width, 10)) / 2 + 'px'
-            eventForm.style.top = (window.innerHeight - parseInt(eventForm.style.height, 10)) / 2 + 'px'
-        };
-
-        function updateInputNode(id, value, placeholder) {
-            var inputNode = document.getElementById(id);
-            inputNode.value = value;
-            inputNode.placeholder = placeholder;
-        }
-
-        function openAddCalendarForm(day) {
-            document.getElementById('date').value = addJson({ day: day });
-
-            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Add';
-            document.getElementById('formTitle').innerHTML = `Add event for day ${day}`;
-
-            this.updateInputNode('eventTitle', '', 'title');
-            this.updateInputNode('eventTime', '10:00', 'time');
-            this.updateInputNode('eventWhere', '', 'where');
-            this.updateInputNode('eventWho', '', 'who');
-            this.updateInputNode('eventId', '', '');
-
-            document.getElementById('addOrEditCalendarEvents').style.display = "block";
-        };
-
-        function openUpdateCalendarForm(calendarEvent) {
-            addJson({ day: calendarEvent.day });
-
-            document.getElementById('eventId').value = calendarEvent.id;
-
-            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Update';
-            document.getElementById('formTitle').innerHTML = `Add event on ${calendarEvent.day}`;
-
-            this.updateInputNode('eventTitle', calendarEvent.title, 'title');
-            this.updateInputNode('eventTime', calendarEvent.time, '');
-            this.updateInputNode('eventWhere', calendarEvent.time, '');
-            this.updateInputNode('eventWhere', calendarEvent.where, 'where');
-            this.updateInputNode('eventWho', calendarEvent.who, 'who');
-
-            document.getElementById('addOrEditCalendarEvents').style.display = "block";
-        };
-
-        function hideDialog() {
-            document.getElementById("addOrEditCalendarEvents").style.display = 'none';
-        };
-
-        function createOrUpdateCalendarEvent() {
-            var title = document.getElementById("eventTitle").value;
-            var time = document.getElementById("eventTime").value;
-            var who = document.getElementById("eventWho").value;
-            var where = document.getElementById("eventWhere").value;
-            var id = document.getElementById("eventId").value;
-            if (title.length < 2 || who.length < 2 || where.length < 2) {
-                alert('all values must be more than 2 characters');
-            }
-            else {
-                this.calendarService.post(title, time, who, where, id).then(() => {
-                    this.calendarService.get().then(() => {
-                        this.hideDialog();
-                        this.loadCalendarPage();
-                    });
-                });
-            }
-            return false
-        };
-
-        function deleteCalendarEvent() {
-            var id = document.getElementById('eventId').value;
-
-            this.calendarService.delete(id).then(() => {
-                this.calendarService.get().then((result) => {
-                }).then(() => {
-                    this.hideDialog();
-                    this.loadCalendarPage();
-                });
-            });
-        };
-
-        function registerCalendarEventListeners(dayArray) {
-            this.onAddCalendarClick();
-            this.onUpdateCalendarEventClick(dayArray);
-        };
-
-        function onClick(element, callback, callbackArgs) {
-            var clickEvents = ["mousedown", "touchstart", "pointer.down"];
-            clickEvents.forEach(function (event) {
-                element.addEventListener(event, function () {
-                    callback(callbackArgs);
-                });
-            });
-        };
-
-        function onMouseOver(element, callback, callbackArgs) {
-            var clickEvents = ["mouseover"];
-            clickEvents.forEach(function (event) {
-                element.addEventListener(event, function () {
-                    callback(callbackArgs);
-                });
-            });
-        };
-
-        function onMouseOut(element, callback, callbackArgs) {
-            var clickEvents = ["mouseout"];
-            clickEvents.forEach(function (event) {
-                element.addEventListener(event, function () {
-                    callback(callbackArgs);
-                });
-            });
-        };
-
-        function onAddCalendarClick() {
-            document.querySelectorAll('.calendar > div > .block > .add').forEach(function (block) {
-                var day = block.parentNode.id;
-                onClick(block, openAddCalendarForm, day);
-            });
-        };
-
-        function onUpdateCalendarEventClick(dayArray) {
-            document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach(function (calendarEventTitle) {
-                var calendarEvent = dayArray[calendarEventTitle.id];
-                onClick(calendarEventTitle, openUpdateCalendarForm, calendarEvent);
-            });
-        };
-
-        function setupMenuEvents() {
-            document.querySelectorAll(`.navbar > a`).forEach(function (link) {
-                if (!link.classList.contains('subMenu')) {
-                    onClick(link, pageLoader, link.id);
-                }
-                onMouseOver(link, function () { link.style.backgroundColor = "black"; });
-                onMouseOut(link, function () { link.style.backgroundColor = "#333"; });
-            });
-        };
-
-        function onSubMenuLinkHover() {
-            document.querySelectorAll(`.subMenu > a`).forEach(function (link) {
-                onMouseOver(link, function () { link.style.backgroundColor = "black"; });
-                onMouseOut(link, function () { link.style.backgroundColor = "#333"; });
-            });
-        };
-
-        function getCurrentPage() {
-            var currentPage;
-            document.querySelectorAll(`.main`).forEach((page) => {
-                if (page.style.display === 'block') {
-                    currentPage = page;
-                }
-            });
-            return currentPage;
-        };
-
-        function getNewPage(id) {
-            var newPageClass = id;
-            if (newPageClass == 'trends')
-                this.removeSubMenu();
-            else if (newPageClass == 'calendar')
-                this.calendarService.drawCalendarService.createCalendarSubMenu();
-            return document.querySelectorAll(`.main.${newPageClass}`)[0];
-        }
-
-        function pageLoader(id) {
-            document.getElementById(`${getCurrentPage().id}`).style.display = 'none';
-            getNewPage(id).style.display = 'block';
-        }
     </script>
 
 </body>
