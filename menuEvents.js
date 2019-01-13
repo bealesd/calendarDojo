@@ -22,7 +22,9 @@ class MenuEvents {
     pageLoader(id) {
         document.querySelectorAll('.main').forEach((main) => { main.style.display = 'none'; });
         document.querySelectorAll(`.main.${id}`)[0].style.display = 'block';
-        console.log(id);
+        document.querySelectorAll('.subMenuElement').forEach((subMenu) => { subMenu.style.display = 'none'; });
+        //TODO ensure submenu added again
+        //subMenuElement
         DataStore.addJson({ currentPage: id });
     }
 }

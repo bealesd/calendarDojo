@@ -1,21 +1,13 @@
 class CustomEvents {
     static onClick(element, callback, callbackArgs) {
         var clickEvents = ["mousedown", "touchstart", "pointer.down"];
-
-        //$("body").on("click", element, function () {
-        //    callback(callbackArgs);
-        //});
-
         clickEvents.forEach(function (event) {
             $(element).on(event, function () {
                 callback(callbackArgs);
             }.bind(this));
         });
 
-        //$(element).on('click', function () {
-        //    callback(callbackArgs);
-        //}.bind(this));
-
+        //TODO: will work, but not with off(), would have to store all callbacks to remove them
         //clickEvents.forEach(function (event) {
         //    element.addEventListener(event, function () {
         //        callback(callbackArgs);
@@ -23,18 +15,8 @@ class CustomEvents {
         //});
     }
 
-    static unregisterOnClick(element, callback, callbackArgs) {
-        var clickEvents = ["mousedown", "touchstart", "pointer.down"];
-        //$("body").off();
-        $("body").off("click", element, function () {
-            callback(callbackArgs);
-        });
-
-        clickEvents.forEach(function (event) {
-            element.removeEventListener(event, function () {
-                callback(callbackArgs);
-            });
-        });
+    static unregisterJqueryEvents(element) {
+        $(element).off();
     }
 
     static onMouseOver(element, callback, callbackArgs) {

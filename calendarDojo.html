@@ -71,11 +71,10 @@
 
         DataStore.addJson({ currentPage: 'calendar' });
 
-        this.onLoad();
+        this.onLoad();//should redraw submenu here, but its only loaded one so it wont be, need to call again on returnung to calendar page?
         //this.onResize();
 
         function onLoad() {
-            console.log('onload called');
             window.addEventListener("load", this.loadTab, false);
         };
 
@@ -83,11 +82,11 @@
             var currentTab = document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
             currentTab.style.backgroundColor = 'darkred';
             var tabKeys = Object.keys(this.callbackService.getTabCallbacks());
-            //console.log(this.callbackService.subMenuCallbacks);
             for (var i = 0; i < tabKeys.length; i++) {
                 if (tabKeys[i] === currentTab.id) {
                     removeSubMenu();
                     this.callbackService.triggerTabCallback(tabKeys[i]);
+                    console.log('called submenu');
                     this.callbackService.triggerSubMenuCallback(tabKeys[i]);
                 }
             }
@@ -103,7 +102,7 @@
             if (!resizeTimeout) {
                 resizeTimeout = setTimeout(function () {
                     resizeTimeout = null;
-                    this.loadCalendarPage();
+                    this.loadTab();//need to redraw
                 }, 66);
             }
         };
