@@ -5,18 +5,18 @@ class CalendarController {
         this.calendarService.drawCalendarService = new DrawCalendar();
         this.calendarService.dateHelper = new DateHelper();
         this.calendarService.calendarTimer = new CalendarTimer();
-
         this.registerTabCallbacks = registerTabCallbacks;
         this.registerSubMenuCallbacks = registerSubMenuCallbacks;
+        this.calendarEventsRegistered = false;
     }
 
     registerCalendarCallbacks() {
+        console.log('registerCalendarCallbacks was called again');
         this.registerTabCallbacks(this.calendarPageCallback.bind(this), 'calendar');
         this.registerSubMenuCallbacks(this.calendarSubMenuCallback.bind(this), 'calendar');
     }
 
     //#region calendar page
-
     calendarPageCallback() {
         this.calendarService.get().then((result) => {
             this.loadCalendarPage();
@@ -38,7 +38,6 @@ class CalendarController {
     }
 
     registerCalendarEventListeners() {
-        //fix, this is being called too may times, i.e. on each page load
         this.onAddCalendarClick();
         this.onUpdateCalendarEventClick();
         this.onDeleteCalendarEventClick();
@@ -49,20 +48,46 @@ class CalendarController {
     onAddCalendarClick() {
         document.querySelectorAll('.calendar > div > .block > .add').forEach(function (block) {
             var day = block.parentNode.id;
-            CustomEvents.onClick(block, this.openAddCalendarForm.bind(this), day);
+
+            $(block).off();
+
+            //$(block).on('click', function () {
+            //    console.log(`clicked ${day}`);
+            //    this.openAddCalendarForm(day);
+            //}.bind(this));
+
+            //CustomEvents.unregisterOnClick(block, this.openAddCalendarForm.bind(this), day);
+            //CustomEvents.onClick(block, this.openAddCalendarForm.bind(this), day);
+            CustomEvents.onClick($(block), this.openAddCalendarForm.bind(this), day);
         }.bind(this));
     }
 
     onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach(function (calendarEventTitle) {
             var calendarEvent = DataStore.getCurrentMonthCalendarRecords()[calendarEventTitle.id];
-            CustomEvents.onClick(calendarEventTitle, this.openUpdateCalendarForm.bind(this), calendarEvent);
+            //CustomEvents.onClick(calendarEventTitle, this.openUpdateCalendarForm.bind(this), calendarEvent);
+
+            $(calendarEventTitle).off();
+            //$(calendarEventTitle).on('click', function () {
+            //    this.openUpdateCalendarForm(calendarEvent);
+            //}.bind(this));
+
+            CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
+
         }.bind(this));
     }
 
     onDeleteCalendarEventClick() {
-        var calendarEventDelete = document.getElementById('eventDelete');
-        CustomEvents.onClick(calendarEventDelete, this.deleteCalendarEvent.bind(this));
+        //var calendarEventDelete = document.getElementById('eventDelete');
+        //CustomEvents.onClick(calendarEventDelete, this.deleteCalendarEvent.bind(this));
+
+        $('#eventDelete').off();
+        //$('#eventDelete').on('click', function () {
+        //    this.deleteCalendarEvent();
+        //}.bind(this));
+
+        CustomEvents.onClick($('#eventDelete'), this.deleteCalendarEvent.bind(this));
+
     }
 
     deleteCalendarEvent() {
@@ -78,13 +103,25 @@ class CalendarController {
     }
 
     onCancelCalendarEventClick() {
-        var calendarEventClose= document.getElementById('eventClose');
-        CustomEvents.onClick(calendarEventClose, this.hideDialog.bind(this));
+        //var calendarEventClose = document.getElementById('eventClose');
+
+        $('#eventClose').off();
+        //$('#eventClose').on('click', function () {
+        //    this.hideDialog();
+        //}.bind(this));
+
+        CustomEvents.onClick($('#eventClose'), this.hideDialog.bind(this));
     }
 
     onCreateOrUpdateCalendarEventClick() {
-        var calendarEventCreateOrUpdate = document.getElementById('eventAddOrUpdateButton');
-        CustomEvents.onClick(calendarEventCreateOrUpdate, this.createOrUpdateCalendarEvent.bind(this));
+        $('#eventAddOrUpdateButton').off();
+        //$('#eventAddOrUpdateButton').on('click', function () {
+        //    this.createOrUpdateCalendarEvent();
+        //}.bind(this));
+
+        //called multile times
+        //var calendarEventCreateOrUpdate = document.getElementById('eventAddOrUpdateButton');
+        CustomEvents.onClick($('#eventAddOrUpdateButton'), this.createOrUpdateCalendarEvent.bind(this));
     }
 
     createOrUpdateCalendarEvent() {

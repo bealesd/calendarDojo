@@ -5,6 +5,7 @@
     <title>Calendar</title>
 
     <link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
     <script src="./dateHelper.js" type="text/javascript"></script>
     <script src="./calendarHelper.js" type="text/javascript"></script>
@@ -74,6 +75,7 @@
         //this.onResize();
 
         function onLoad() {
+            console.log('onload called');
             window.addEventListener("load", this.loadTab, false);
         };
 
@@ -81,7 +83,7 @@
             var currentTab = document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
             currentTab.style.backgroundColor = 'darkred';
             var tabKeys = Object.keys(this.callbackService.getTabCallbacks());
-            console.log(this.callbackService.subMenuCallbacks);
+            //console.log(this.callbackService.subMenuCallbacks);
             for (var i = 0; i < tabKeys.length; i++) {
                 if (tabKeys[i] === currentTab.id) {
                     removeSubMenu();
