@@ -14,7 +14,7 @@ class DrawCalendar {
         calendarContainer.style.marginLeft = `${gutter}px`;
     }
 
-    setColors() { this.colors = ['#FF355E', '#FF6037', '	#FFCC33', '#66FF66', '#50BFE6', '#FF00CC']; }
+    setColors() { this.colors = ['#FF355E', '#FF6037', '#FFCC33', '#66FF66', '#50BFE6', '#FF00CC']; }
 
     setMonthAndYearText(month, monthName, year) {
         document.getElementById("date").innerHTML = `${monthName}  ${year}`;
@@ -49,17 +49,20 @@ class DrawCalendar {
 
     calculateBlockHeight() {
         var calendarArray = DataStore.getCurrentMonthCalendarRecords();
-        var maxRowCount = 0;
-        for (var i = 1; i <= this.daysInMonth; i++) {
-            var currentRowCount = 0;
-            if (calendarArray[i]) {
-                for (var j = 0; j < calendarArray[i].length; j++) {
-                    currentRowCount++;
-                }
-            }
-            if (currentRowCount > maxRowCount) maxRowCount = currentRowCount;
+        var maxDaysCount = 0;
+        var daysCount = {};
+        for (var i = 0; i < this.daysInMonth; i++) {
+            daysCount[i] = 0;
         }
-        return 80 + (maxRowCount * 10);
+        var calendarKeys = Object.keys(calendarArray);
+        for (var j = 0; j < calendarKeys.length; j++) {
+            daysCount[calendarArray[calendarKeys[j]].day]++;
+        }
+        for (var k = 0; k < Object.keys(daysCount).length; k++) {
+            if (daysCount[k] > maxDaysCount)
+                maxDaysCount = daysCount[k];
+        }
+        return 80 + maxDaysCount * 10;
     }
 
     createCalendarDayRow(calendarEvent) {

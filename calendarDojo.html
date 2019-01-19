@@ -14,7 +14,7 @@
     <script src="./drawCalendar.js" type="text/javascript"></script>
     <script src="./calendarTimer.js" type="text/javascript"></script>
     <script src="./calendarService.js" type="text/javascript"></script>
-    <script src="./eventListener.js" type="text/javascript"></script>
+    <script src="./callbackController.js" type="text/javascript"></script>
     <script src="./dataStore.js" type="text/javascript"></script>
     <script src="./customEvents.js" type="text/javascript"></script>
     <script src="./calendarController.js" type="text/javascript"></script>
@@ -30,7 +30,7 @@
         <div class="subMenu"></div>
     </div>
 
-    <div id="mainContentOne" class="main calendar" style="display:block;">
+    <div id="mainContentOne" class="main calendar" style="display:none;">
         <p id="calendarStatus"></p>
         <heading id="date"></heading>
         <br>
@@ -58,54 +58,14 @@
     </form>
 
     <script>
-        function removeSubMenu() {
-            document.getElementsByClassName('subMenu')[0].innerHTML = '';
-        };
-
         this.callbackService = CallbackService();
         this.calendarController = new CalendarController(callbackService.registerSubMenuCallbacks, callbackService.registerTabCallbacks);
-
         this.calendarController.registerCalendarCallbacks();
-        this.eventListener = new EventListener();
-        this.menuEvents = new MenuEvents();
+
+        this.callbackController = CallbackController();
+        this.callbackController.intialize(this.callbackService);
 
         DataStore.addJson({ currentPage: 'calendar' });
-
-        this.onLoad();//should redraw submenu here, but its only loaded one so it wont be, need to call again on returnung to calendar page?
-        //this.onResize();
-
-        function onLoad() {
-            window.addEventListener("load", this.loadTab, false);
-        };
-
-        function loadTab() {
-            var currentTab = document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
-            currentTab.style.backgroundColor = 'darkred';
-            var tabKeys = Object.keys(this.callbackService.getTabCallbacks());
-            for (var i = 0; i < tabKeys.length; i++) {
-                if (tabKeys[i] === currentTab.id) {
-                    removeSubMenu();
-                    this.callbackService.triggerTabCallback(tabKeys[i]);
-                    console.log('called submenu');
-                    this.callbackService.triggerSubMenuCallback(tabKeys[i]);
-                }
-            }
-            this.menuEvents.setupMenuEvents();
-        };
-
-        function onResize() {
-            window.addEventListener("resize", resizeThrottler, false);
-        };
-
-        function resizeThrottler() {
-            var resizeTimeout;
-            if (!resizeTimeout) {
-                resizeTimeout = setTimeout(function () {
-                    resizeTimeout = null;
-                    this.loadTab();//need to redraw
-                }, 66);
-            }
-        };
     </script>
 
 </body>

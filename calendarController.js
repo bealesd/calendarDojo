@@ -17,12 +17,17 @@ class CalendarController {
 
     //#region calendar page
     calendarPageCallback() {
-        this.calendarService.get().then(() => {
+        if (DataStore.getJson().allCalendarRecords === undefined) {
+            this.calendarService.get().then(() => {
+                this.loadCalendarPage();
+            });
+        }
+        else {
             this.loadCalendarPage();
-        });
+        }
     }
 
-    loadCalendarPage() {
+    loadCalendarPage() {//this is called on page load and resize. what is the result of calling this twice?
         this.calendarService.drawCalendar();
         this.setCalendarEventsFormPosition();
         this.registerCalendarEventListeners();
@@ -152,8 +157,8 @@ class CalendarController {
     //#region submenu  
     calendarSubMenuHtml() {
         var height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
-        var previousMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="nextMonth"><span class="glyphicon glyphicon-menu-left"></span></a>`;
-        var nextMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="previousMonth"><span class="glyphicon glyphicon-menu-right"></span></a>`;
+        var previousMonthHtml = `<a style='height:${height}'  class="calendar" id="nextMonth"><span class="glyphicon glyphicon-menu-left"></span></a>`;
+        var nextMonthHtml = `<a style='height:${height}'  class="calendar" id="previousMonth"><span class="glyphicon glyphicon-menu-right"></span></a>`;
         return previousMonthHtml + nextMonthHtml;
     }
 

@@ -8,11 +8,7 @@ class CalendarService {
     }
 
     post(title, time, who, where, id) {
-        console.log(`post for '${title}' with id: '${id}'`);
         return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getJson().day);
-        //    .then(() => {
-        //    console.log(`Inserted or updated calendar event: ${title}, id: ${id}`);
-        //}
     }
 
     delete(id) {
@@ -100,7 +96,6 @@ class CalendarService {
         this.drawCalendarService.updateCalendarColors();
         this.drawCalendarService.setMonthAndYearText(this.dateHelper.getMonthNumber(), this.dateHelper.getMonthName(), this.dateHelper.getYear());
         this.drawCalendarService.setCalendarBorder();
-        //this.drawCalendarService.createCalendarSubMenu();
     }
 
 }
