@@ -20,7 +20,6 @@ function CallbackController() {
 
             loadTab: function () {
                 var currentTab = this.getCurrentTab();
-                //currentTab.style.backgroundColor = 'darkred';
                 var tabKeys = Object.keys(this.callbackService.getTabCallbacks());
                 for (var i = 0; i < tabKeys.length; i++) {
                     if (tabKeys[i] === currentTab.id) {

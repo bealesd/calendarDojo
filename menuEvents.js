@@ -17,10 +17,10 @@ class MenuEvents {
             });
         }.bind(this));
         this.onSubMenuLinkHover();
-        this.clickCalendarLink();
+        this.clickCalendarMainMenu();
     }
 
-    clickCalendarLink() {
+    clickCalendarMainMenu() {
         $('#calendar').change(function (link) {
             link.target.style.backgroundColor = "darkred";
             document.getElementsByClassName(`main ${link.target.id}`)[0].style.display = 'block'; 
@@ -29,7 +29,7 @@ class MenuEvents {
         $('#calendar').off("change");
     }
 
-    getCurrentTab() {
+    getCurrentTab() {//move to static helper
         return document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
     }
 
@@ -41,13 +41,24 @@ class MenuEvents {
     }
 
     loadPage(link) {//not called on intial page load, only on subsequent page loads.
+        this.updateCurrentPage(link.id);
+        this.updateCurrentMainMenu(link);
+        this.updateCurrentSubMenu(link.id);
+        DataStore.addJson({ currentPage: link.id });
+    }
+
+    updateCurrentMainMenu(mainMenuLink) {
         document.querySelectorAll(`.navbar > a`).forEach(function (link) { link.style.backgroundColor = '#333'; });
-        link.style.backgroundColor = 'darkred';
-        var id = link.id;
-        document.querySelectorAll('.main').forEach((main) => { main.style.display = 'none'; });//hide all pages
-        document.querySelectorAll(`.main.${id}`)[0].style.display = 'block';//show current page
-        document.querySelectorAll('.subMenuElement').forEach((subMenu) => { subMenu.style.display = 'none'; });//hide all sub menus
-        document.querySelectorAll(`.subMenuElement.${id}`).forEach((subMenu) => { subMenu.style.display = 'block'; }); //show sub menu
-        DataStore.addJson({ currentPage: id });
+        mainMenuLink.style.backgroundColor = 'darkred';
+    }
+
+    updateCurrentPage(pageId) {
+        document.querySelectorAll('.main').forEach((main) => { main.style.display = 'none'; });
+        document.querySelectorAll(`.main.${pageId}`)[0].style.display = 'block';
+    }
+
+    updateCurrentSubMenu(pageId) {
+        document.querySelectorAll('.subMenu > a').forEach((subMenuElement) => { subMenuElement.style.display = 'none'; });
+        document.querySelectorAll(`.subMenu > .${pageId}`).forEach((subMenuElement) => { subMenuElement.style.display = 'block'; });
     }
 }

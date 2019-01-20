@@ -125,6 +125,17 @@ class CalendarController {
         this.updateInputNode('eventWhere', calendarEvent.where, 'where');
         this.updateInputNode('eventWho', calendarEvent.who, 'who');
 
+
+        var yOffset = window.pageYOffset;
+        var windowHeight = window.innerHeight;
+        var windowWidth = window.innerWidth;
+        var formWidth = '298';
+        var formHeight = '267.4';
+        var style = document.getElementById('addOrEditCalendarEvents').style;
+
+        style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
+        style.left = `${(windowWidth - formWidth) / 2}px`;
+
         document.getElementById('addOrEditCalendarEvents').style.display = "block";
     }
 
@@ -140,7 +151,19 @@ class CalendarController {
         this.updateInputNode('eventWho', '', 'who');
         this.updateInputNode('eventId', '', '');
 
-        document.getElementById('addOrEditCalendarEvents').style.display = "block";
+
+        //set styles of addOrEditCalendarEvents
+        var yOffset = window.pageYOffset;
+        var windowHeight = window.innerHeight;
+        var windowWidth = window.innerWidth;
+        var formWidth = '298';
+        var formHeight = '267.4';
+        var style = document.getElementById('addOrEditCalendarEvents').style;
+        
+        style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
+        style.left = `${(windowWidth - formWidth) / 2}px`;
+
+        style.display = "block";
     }
 
     updateInputNode(id, value, placeholder) {

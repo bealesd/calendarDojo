@@ -18,8 +18,12 @@ class CalendarService {
     get() {//TODO: rename to start calendar, it gets and controls timer
         this.calendarTimer.startGetCalendarTimer();
         return new Promise(function (res, rej) {
+            if (window.getCalled === true) {
+                this.calendarTimer.stopGetCalendarTimer();
+            }
             this.calendarRepo.getData().then(function (results) {
                 DataStore.addJson({ allCalendarRecords: results });
+                window.getCalled = true;
                 this.setCalendarEventsForCurrentMonth(results);
                 this.calendarTimer.stopGetCalendarTimer();
                 res(`'getData' retrieved: ${results.length} calendar events.`);
