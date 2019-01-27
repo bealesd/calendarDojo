@@ -8,6 +8,7 @@ class CalendarController {
         this.registerTabCallbacks = registerTabCallbacks;
         this.registerSubMenuCallbacks = registerSubMenuCallbacks;
         this.calendarEventsRegistered = false;
+        this.calendarFormId = 'addOrEditCalendarEvents';
     }
 
     registerCalendarCallbacks() {
@@ -27,26 +28,20 @@ class CalendarController {
         }
     }
 
-    loadCalendarPage() {//this is called on page load and resize. what is the result of calling this twice?
+    loadCalendarPage() {
         this.calendarService.drawCalendar();
-        this.setCalendarEventsFormPosition();
         this.registerCalendarEventListeners();
     }
     //#endregion
 
     //#region calendar events 
-    setCalendarEventsFormPosition() {
-        var eventForm = document.getElementById('addOrEditCalendarEvents');
-        eventForm.style.left = (window.innerWidth - parseInt(eventForm.style.width, 10)) / 2 + 'px';
-        eventForm.style.top = (window.innerHeight - parseInt(eventForm.style.height, 10)) / 2 + 'px';
-    }
-
     registerCalendarEventListeners() {
         this.onAddCalendarClick();
         this.onUpdateCalendarEventClick();
         this.onDeleteCalendarEventClick();
         this.onCancelCalendarEventClick();
         this.onCreateOrUpdateCalendarEventClick();
+        this.onMultipleCalendarDaysEventClick();
     }
 
     onAddCalendarClick() {
@@ -74,7 +69,7 @@ class CalendarController {
 
     onCancelCalendarEventClick() {
         $('#eventClose').off();
-        CustomEvents.onClick($('#eventClose'), this.hideDialog.bind(this));
+        CustomEvents.onClick($('#eventClose'), this.hideForm.bind(this));
     }
 
     onCreateOrUpdateCalendarEventClick() {
@@ -82,29 +77,68 @@ class CalendarController {
         CustomEvents.onClick($('#eventAddOrUpdateButton'), this.createOrUpdateCalendarEvent.bind(this));
     }
 
+    onMultipleCalendarDaysEventClick() {
+        $('#eventMultipleDays').off();
+        this.i = 0;
+        CustomEvents.onClick($('#eventMultipleDays'), this.multipleCalendarDaysEventClick.bind(this));
+    }
+
+    multipleCalendarDaysEventClick() {
+        console.log(`multipleCalendarDaysEventClick ${this.i++}`);
+        $('#dateRange').toggle();
+    }
+
     deleteCalendarEvent() {
         var id = document.getElementById('eventId').value;
         this.calendarService.delete(id).then(() => {
             this.calendarService.get().then(() => {
-                this.hideDialog();
+                this.hideForm();
                 this.loadCalendarPage();
             });
         });
     }
 
-    createOrUpdateCalendarEvent() {
+    createOrUpdateCalendarEvent() {//work in here
         var title = document.getElementById("eventTitle").value;
         var time = document.getElementById("eventTime").value;
         var who = document.getElementById("eventWho").value;
         var where = document.getElementById("eventWhere").value;
         var id = document.getElementById("eventId").value;
-        if (title.length < 2 || who.length < 2 || where.length < 2) {
-            alert('all values must be more than 2 characters');
+        
+        if (title.trim().length === 0 || who.trim().length === 0 || where.trim().length === 0) {
+            alert('form incomplete');
+            return false;
         }
+        var isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value)
+
+        if (this.isMultipleDaysSelected() && !isValidDateRange){
+            alert('invalid date');
+            return false;
+        }
+
+        if (this.isMultipleDaysSelected()) {
+            var dateRange = this.getDateRange();
+            var month = dateRange.from.month;
+            var year = dateRange.from.year;
+            var dayRange = dateRange.to.day - dateRange.from.day;
+
+            for (var i = 0; i <= dayRange; i++) {
+                var day = dateRange.from.day + i;
+                this.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(function () {
+                    if (day === dateRange.to.day) {
+                        this.calendarService.get().then(() => {
+                            this.hideForm();
+                            this.loadCalendarPage();
+                        });
+                    }
+                }.bind(this));
+            }
+        }
+
         else {
             this.calendarService.post(title, time, who, where, id).then(() => {
                 this.calendarService.get().then(() => {
-                    this.hideDialog();
+                    this.hideForm();
                     this.loadCalendarPage();
                 });
             });
@@ -112,58 +146,89 @@ class CalendarController {
         return false;
     }
 
+    getDateRange() {
+        var from = document.getElementById(`eventFrom`).value;
+        var dayFrom = parseInt(from.split('-')[2]);
+        var monthFrom = parseInt(from.split('-')[1]);
+        var yearFrom = parseInt(from.split('-')[0]);
+
+        var to = document.getElementById(`eventTo`).value;
+        var dayTo = parseInt(to.split('-')[2]);
+        var monthTo = parseInt(to.split('-')[1]);
+        var yearTo = parseInt(to.split('-')[0]);
+
+        return {
+            from: {
+                day: dayFrom,
+                month: monthFrom,
+                year: yearFrom
+            },
+            to: {
+                day: dayTo,
+                month: monthTo,
+                year: yearTo
+            }
+        };
+    }
+
+    isMultipleDaysSelected() {
+        return $('#eventMultipleDays')[0].checked;
+    }
+
     openUpdateCalendarForm(calendarEvent) {
+        $('#multipleDays').hide();
+        $('#dateRange').hide();
+
         DataStore.addJson({ day: calendarEvent.day });
-
-        document.getElementById('eventId').value = calendarEvent.id;
-        document.getElementById('eventAddOrUpdateButton').innerHTML = 'Update';
-        document.getElementById('formTitle').innerHTML = `Add event on ${calendarEvent.day}`;
-
-        this.updateInputNode('eventTitle', calendarEvent.title, 'title');
-        this.updateInputNode('eventTime', calendarEvent.time, '');
-        this.updateInputNode('eventWhere', calendarEvent.time, '');
-        this.updateInputNode('eventWhere', calendarEvent.where, 'where');
-        this.updateInputNode('eventWho', calendarEvent.who, 'who');
-
-
-        var yOffset = window.pageYOffset;
-        var windowHeight = window.innerHeight;
-        var windowWidth = window.innerWidth;
-        var formWidth = '298';
-        var formHeight = '267.4';
-        var style = document.getElementById('addOrEditCalendarEvents').style;
-
-        style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
-        style.left = `${(windowWidth - formWidth) / 2}px`;
-
-        document.getElementById('addOrEditCalendarEvents').style.display = "block";
+        this.setCalendarFormType('Update');
+        this.setCalendarFormValues(`Update event on ${calendarEvent.day}`, calendarEvent.title, calendarEvent.time, calendarEvent.where, calendarEvent.who, calendarEvent.id);
+        this.setCalendarFormPosition();
+        this.showForm();
     }
 
     openAddCalendarForm(day) {
+        $('#eventMultipleDays')[0].checked = false;
+        $('#multipleDays').show();
+        $('#dateRange').hide();
+
         document.getElementById('date').value = DataStore.addJson({ day: day });
+        this.setCalendarFormType('Add');
+        this.setCalendarFormValues(`Add event for day ${day}`, '', '10:00', '', '', '');
+        this.setCalendarFormPosition();
+        this.showForm();
+    }
 
-        document.getElementById('eventAddOrUpdateButton').innerHTML = 'Add';
-        document.getElementById('formTitle').innerHTML = `Add event for day ${day}`;
+    setCalendarFormType(formType) {
+        if (formType.toLowerCase() === 'update') {
+            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Update';
+        }
+        else if (formType.toLowerCase() === 'add') {
+            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Add';
+        }
+        else {
+            console.log(`Invalid form type: ${formType}`);
+        }
+    }
 
-        this.updateInputNode('eventTitle', '', 'title');
-        this.updateInputNode('eventTime', '10:00', 'time');
-        this.updateInputNode('eventWhere', '', 'where');
-        this.updateInputNode('eventWho', '', 'who');
-        this.updateInputNode('eventId', '', '');
+    setCalendarFormValues(formTitle, eventTitle, time, where, who, id) {
+        document.getElementById('eventId').value = id;
+        document.getElementById('formTitle').innerHTML = formTitle;
+        this.updateInputNode('eventTitle', eventTitle, 'title');
+        this.updateInputNode('eventTime', time, '');
+        this.updateInputNode('eventWhere', where, 'where');
+        this.updateInputNode('eventWho', who, 'who');
+    }
 
-
-        //set styles of addOrEditCalendarEvents
+    setCalendarFormPosition() {
         var yOffset = window.pageYOffset;
         var windowHeight = window.innerHeight;
         var windowWidth = window.innerWidth;
         var formWidth = '298';
         var formHeight = '267.4';
-        var style = document.getElementById('addOrEditCalendarEvents').style;
-        
+        var style = document.getElementById(this.calendarFormId).style;
+
         style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
         style.left = `${(windowWidth - formWidth) / 2}px`;
-
-        style.display = "block";
     }
 
     updateInputNode(id, value, placeholder) {
@@ -172,8 +237,12 @@ class CalendarController {
         inputNode.placeholder = placeholder;
     }
 
-    hideDialog() {
-        document.getElementById("addOrEditCalendarEvents").style.display = 'none';
+    hideForm() {
+        document.getElementById(this.calendarFormId).style.display = 'none';
+    }
+
+    showForm() {
+        document.getElementById(this.calendarFormId).style.display = 'block';
     }
     //#endregion
 

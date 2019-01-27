@@ -41,6 +41,29 @@ class CalendarRepo {
         }.bind(this));
     }
 
+    postDataWithDate(title, time, who, where, id = "", day, month, year) {
+        var data = {
+            title: `${title}`,
+            date: `${year}/${month}/${day}`,
+            time: `${time}`,
+            who: `${who}`,
+            where: `${where}`,
+            id: `${id}`
+        };
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", this.calendarRepoUrl, true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.send(JSON.stringify(data));
+        return new Promise(function (res, rej) {
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4 && (this.status === 200 || this.status === 201))
+                    return res();
+                if (this.readyState === 4 && (this.status !== 200 || this.status !== 201))
+                    return rej();
+            };
+        }.bind(this));
+    }
+
     deleteData(id){
         var xhttp = new XMLHttpRequest();
         xhttp.open('DELETE', `${this.calendarRepoUrl}?id=${id}`, true);

@@ -26,11 +26,12 @@
 <body>
     <div class="navbar">
         <a id="calendar">calendar</a>
+        <a id="test">test</a>
         <a id="trends">trends</a>
         <div class="subMenu"></div>
     </div>
 
-    <div id="mainContentOne" class="main calendar" style="display:none;">
+    <div class="main calendar" style="display:none;">
         <p id="calendarStatus"></p>
         <heading id="date"></heading>
         <br>
@@ -38,21 +39,32 @@
         <div id="calendarContainer"></div>
     </div>
 
-    <div id="mainContentTwo" class="main trends" style="display:none;">
+    <div class="main trends" style="display:none;">
         <p>Calendar Trends</p>
+    </div>
+
+    <div class="main test" style="display:none;">
+        <p>Test</p>
     </div>
 
     <div id="dataStore"></div>
 
     <form id="addOrEditCalendarEvents"
           style="background-color:#FFFFFF; padding:30px; position: absolute; opacity: 50; z-index: 950; display: none;">
-       <!-- style="background-color:#FFFFFF; margin: auto; width: 50%; padding:30px; position: absolute; opacity: 50; width: 298px;height: 267.4px; left: 174px; top: 49px;z-index: 950; display: none;">-->
+        <!-- style="background-color:#FFFFFF; margin: auto; width: 50%; padding:30px; position: absolute; opacity: 50; width: 298px;height: 267.4px; left: 174px; top: 49px;z-index: 950; display: none;">-->
         <h3 id="formTitle">Title</h3>
         <div hidden id="eventId"></div>
         <input id="eventTitle" type="text" name="title" placeholder="title"><br>
         <input id="eventTime" type="time" name="when" step='900'><br>
         <input id="eventWhere" type="text" name="where" placeholder="where"><br>
         <input id="eventWho" type="text" name="who" placeholder="who"><br>
+
+        <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox" name="checkbox"><br></span>
+        <div id="dateRange">
+        <input id="eventFrom" type="date" name="date"><br>
+        <input id="eventTo" type="date" name="date"><br>
+        </div>
+
         <button id='eventAddOrUpdateButton' type="button">Add</button>
         <button id='eventDelete' type="button">Delete</button>
         <button id='eventClose' type="button">Cancel</button>

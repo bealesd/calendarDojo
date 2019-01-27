@@ -11,6 +11,10 @@ class CalendarService {
         return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getJson().day);
     }
 
+    postWithDate(title, time, who, where, id, day, month, year) {
+        return this.calendarRepo.postDataWithDate(title, time, who, where, id, day, month, year);
+    }
+
     delete(id) {
         return this.calendarRepo.deleteData(id);
     }
