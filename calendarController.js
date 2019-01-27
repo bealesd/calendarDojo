@@ -104,28 +104,28 @@ class CalendarController {
         var who = document.getElementById("eventWho").value;
         var where = document.getElementById("eventWhere").value;
         var id = document.getElementById("eventId").value;
-        
+
         if (title.trim().length === 0 || who.trim().length === 0 || where.trim().length === 0) {
             alert('form incomplete');
             return false;
         }
-        var isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value)
+        var isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value);
 
-        if (this.isMultipleDaysSelected() && !isValidDateRange){
+        if (this.isMultipleDaysSelected() && !isValidDateRange) {
             alert('invalid date');
             return false;
         }
 
         if (this.isMultipleDaysSelected()) {
-            var dateRange = this.getDateRange();
-            var month = dateRange.from.month;
-            var year = dateRange.from.year;
-            var dayRange = dateRange.to.day - dateRange.from.day;
-
-            for (var i = 0; i <= dayRange; i++) {
-                var day = dateRange.from.day + i;
+            var dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
+            var index = 0;
+            for (var i = 0; i < dates.length; i++) {
+                index = i;
+                var day = dates[i].getDate();
+                var month = dates[i].getMonth()+1;
+                var year = dates[i].getFullYear();
                 this.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(function () {
-                    if (day === dateRange.to.day) {
+                    if (index === (dates.length - 1)) {
                         this.calendarService.get().then(() => {
                             this.hideForm();
                             this.loadCalendarPage();
@@ -133,6 +133,24 @@ class CalendarController {
                     }
                 }.bind(this));
             }
+
+
+            //var dateRange = this.getDateRange();
+            //var month = dateRange.from.month;
+            //var year = dateRange.from.year;
+            //var dayRange = dateRange.to.day - dateRange.from.day;
+
+            //for (var i = 0; i <= dayRange; i++) {
+            //    var day = dateRange.from.day + i;
+            //    this.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(function () {
+            //        if (day === dateRange.to.day) {
+            //            this.calendarService.get().then(() => {
+            //                this.hideForm();
+            //                this.loadCalendarPage();
+            //            });
+            //        }
+            //    }.bind(this));
+            //}
         }
 
         else {
@@ -169,6 +187,21 @@ class CalendarController {
                 year: yearTo
             }
         };
+    }
+
+    getDates(startDate, stopDate) {
+        var dateArray = new Array();
+        var currentDate = startDate;
+        while (currentDate <= stopDate) {
+            dateArray.push(new Date(currentDate));
+            currentDate = this.addDays(currentDate);
+        }
+        return dateArray;
+    }
+
+    addDays(date) {
+        date.setDate(date.getDate() + 1);
+        return date;
     }
 
     isMultipleDaysSelected() {
