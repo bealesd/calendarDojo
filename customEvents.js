@@ -6,13 +6,6 @@ class CustomEvents {
                 callback(callbackArgs);
             }.bind(this));
         });
-
-        //TODO: will work, but not with off(), would have to store all callbacks to remove them
-        //clickEvents.forEach(function (event) {
-        //    element.addEventListener(event, function () {
-        //        callback(callbackArgs);
-        //    }, {passive: true});
-        //});
     }
 
     static unregisterJqueryEvents(element) {
@@ -36,18 +29,4 @@ class CustomEvents {
             });
         });
     }
-
-    //static onResize() {
-    //    window.addEventListener("resize", resizeThrottler, false);
-    //}
-
-    //resizeThrottler() {
-    //    var resizeTimeout;
-    //    if (!resizeTimeout) {
-    //        resizeTimeout = setTimeout(function () {
-    //            resizeTimeout = null;
-    //            this.loadCalendarPage();
-    //        }, 66);
-    //    }
-    //}
 }
