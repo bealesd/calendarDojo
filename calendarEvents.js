@@ -3,7 +3,6 @@ class CalendarEvents {
         this.calendarFormId = 'addOrEditCalendarEvents';
     }
 
-    //#region calendar events 
     onAddCalendarClick() {
         document.querySelectorAll('.calendar > div > .block > .add').forEach((block) => {
             var day = block.parentNode.id;
@@ -13,7 +12,7 @@ class CalendarEvents {
     }
 
     onUpdateCalendarEventClick() {
-        document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach( (calendarEventTitle) => {
+        document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
             var calendarEvent = DataStore.getCurrentMonthCalendarRecords()[calendarEventTitle.id];
             $(calendarEventTitle).off();
             CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
@@ -21,7 +20,7 @@ class CalendarEvents {
         });
     }
 
-    onDeleteCalendarEventClick(self) {//erroring here, cant get loadpage
+    onDeleteCalendarEventClick(self) {
         $('#eventDelete').off();
         CustomEvents.onClick($('#eventDelete'), () => {
             this.deleteCalendarEvent(self);
@@ -30,14 +29,14 @@ class CalendarEvents {
 
     onCreateOrUpdateCalendarEventClick(self) {
         $('#eventAddOrUpdateButton').off();
-        CustomEvents.onClick($('#eventAddOrUpdateButton'), ()=> {
+        CustomEvents.onClick($('#eventAddOrUpdateButton'), () => {
             this.createOrUpdateCalendarEvent(self);
         });
     }
 
     onCancelCalendarEventClick() {
         $('#eventClose').off();
-        CustomEvents.onClick($('#eventClose'), this.hideForm.bind(this));
+        CustomEvents.onClick($('#eventClose'), () => { FormHelper.hideForm(this.calendarFormId); });
     }
 
     onMultipleCalendarDaysEventClick() {
@@ -54,7 +53,7 @@ class CalendarEvents {
         var id = document.getElementById('eventId').value;
         this.calendarController.calendarService.delete(id).then(() => {
             this.calendarController.calendarService.get().then(() => {
-                this.hideForm();
+                FormHelper.hideForm(this.calendarFormId);
                 this.calendarController.loadCalendarPage();
             });
         });
@@ -80,27 +79,12 @@ class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected()) {
-            var dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
-            var index = 0;
-            for (var i = 0; i < dates.length; i++) {
-                index = i;
-                var day = dates[i].getDate();
-                var month = dates[i].getMonth() + 1;
-                var year = dates[i].getFullYear();
-                this.calendarController.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(() => {
-                    if (index === (dates.length - 1)) {
-                        this.calendarController.calendarService.get().then(() => {
-                            this.hideForm();
-                            this.calendarController.loadCalendarPage();
-                        });
-                    }
-                });
-            }
+            this.createMultipleDaysCalendarEvent(this.calendarController, title, time, who, where, id);
         }
         else {
-            this.calendarController.calendarService.post(title, time, who, where, id).then(()=> {
-                this.calendarController.calendarService.get().then(()=> {
-                    this.hideForm();
+            this.calendarController.calendarService.post(title, time, who, where, id).then(() => {
+                this.calendarController.calendarService.get().then(() => {
+                    FormHelper.hideForm(this.calendarFormId);
                     this.calendarController.loadCalendarPage();
                 });
             });
@@ -108,29 +92,23 @@ class CalendarEvents {
         return false;
     }
 
-    getDateRange() {
-        var from = document.getElementById(`eventFrom`).value;
-        var dayFrom = parseInt(from.split('-')[2]);
-        var monthFrom = parseInt(from.split('-')[1]);
-        var yearFrom = parseInt(from.split('-')[0]);
-
-        var to = document.getElementById(`eventTo`).value;
-        var dayTo = parseInt(to.split('-')[2]);
-        var monthTo = parseInt(to.split('-')[1]);
-        var yearTo = parseInt(to.split('-')[0]);
-
-        return {
-            from: {
-                day: dayFrom,
-                month: monthFrom,
-                year: yearFrom
-            },
-            to: {
-                day: dayTo,
-                month: monthTo,
-                year: yearTo
-            }
-        };
+    createMultipleDaysCalendarEvent(calendarController, title, time, who, where, id) {
+        var dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
+        var index = 0;
+        for (var i = 0; i < dates.length; i++) {
+            index = i;
+            var day = dates[i].getDate();
+            var month = dates[i].getMonth() + 1;
+            var year = dates[i].getFullYear();
+            calendarController.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(() => {
+                if (index === (dates.length - 1)) {
+                    calendarController.calendarService.get().then(() => {
+                        FormHelper.hideForm(this.calendarFormId);
+                        calendarController.loadCalendarPage();
+                    });
+                }
+            });
+        }
     }
 
     getDates(startDate, stopDate) {
@@ -165,7 +143,7 @@ class CalendarEvents {
             calendarEvent.who,
             calendarEvent.id);
         this.setCalendarFormPosition();
-        this.showForm();
+        FormHelper.showForm(this.calendarFormId);
     }
 
     openAddCalendarForm(day) {
@@ -177,7 +155,7 @@ class CalendarEvents {
         this.setCalendarFormType('Add');
         this.setCalendarFormValues(`Add event for day ${day}`, '', '10:00', '', '', '');
         this.setCalendarFormPosition();
-        this.showForm();
+        FormHelper.showForm(this.calendarFormId);
     }
 
     setCalendarFormType(formType) {
@@ -218,14 +196,4 @@ class CalendarEvents {
         inputNode.value = value;
         inputNode.placeholder = placeholder;
     }
-
-    hideForm() {
-        document.getElementById(this.calendarFormId).style.display = 'none';
-    }
-
-    showForm() {
-        document.getElementById(this.calendarFormId).style.display = 'block';
-    }
-    //#endregion
-
 }

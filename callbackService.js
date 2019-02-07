@@ -19,7 +19,6 @@ function CallbackService() {
                 tabCallbacks[name] = callbackFunction;
             },
             triggerTabCallback: function (callbackFunction) {
-                console.log('triggerTabCallback');
                 tabCallbacks[callbackFunction]();
             }
         };

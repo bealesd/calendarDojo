@@ -13,11 +13,14 @@ class CalendarController {
     }
 
     registerCalendarCallbacks() {
+        this.calendarSubMenu = CalendarSubMenu();
         this.registerTabCallbacks(this.calendarPageCallback.bind(this), 'calendar');
-        this.registerSubMenuCallbacks(this.calendarSubMenuCallback.bind(this), 'calendar');
+        this.registerSubMenuCallbacks(function() {
+            this.calendarSubMenu.calendarSubMenuCallback.call(this);
+        }.bind(this), 'calendar');
     }
 
-    //#region calendar page
+    //#region calendar page setup
     calendarPageCallback() {
         if (DataStore.getJson().allCalendarRecords === undefined) {
             this.calendarService.get().then(() => {
@@ -31,48 +34,16 @@ class CalendarController {
 
     loadCalendarPage() {
         this.calendarService.drawCalendar();
-        this.registerCalendarEventListeners();
+        this.registerCalendarPageEventListeners();
     }
 
-    registerCalendarEventListeners() {
+    registerCalendarPageEventListeners() {
         this.calendarEvents.onAddCalendarClick();
         this.calendarEvents.onUpdateCalendarEventClick();
         this.calendarEvents.onDeleteCalendarEventClick(this);
         this.calendarEvents.onCancelCalendarEventClick();
         this.calendarEvents.onCreateOrUpdateCalendarEventClick(this);
         this.calendarEvents.onMultipleCalendarDaysEventClick();
-    }
-    //#endregion
-
-    //#region submenu  
-    calendarSubMenuHtml() {
-        var height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
-        var previousMonthHtml = `<a style='height:${height}'  class="calendar" id="nextMonth"><span class="glyphicon glyphicon-menu-left"></span></a>`;
-        var nextMonthHtml = `<a style='height:${height}'  class="calendar" id="previousMonth"><span class="glyphicon glyphicon-menu-right"></span></a>`;
-        return previousMonthHtml + nextMonthHtml;
-    }
-
-    placeSubMenu(subMenuHtml) {
-        document.getElementsByClassName('subMenu')[0].innerHTML = subMenuHtml;
-    }
-
-    calendarSubMenuCallback() {
-        var subMenuHtml = this.calendarSubMenuHtml();
-        this.placeSubMenu(subMenuHtml);
-        document.getElementById('nextMonth').addEventListener('click', this.calendarForwards.bind(this));
-        document.getElementById('previousMonth').addEventListener('click', this.calendarBackwards.bind(this));
-    }
-
-    calendarBackwards() {
-        this.calendarService.dateHelper.updateDate(true);
-        this.calendarService.setCalendarEventsForCurrentMonth();
-        this.loadCalendarPage();
-    }
-
-    calendarForwards() {
-        this.calendarService.dateHelper.updateDate(false);
-        this.calendarService.setCalendarEventsForCurrentMonth();
-        this.loadCalendarPage();
     }
     //#endregion
 }
