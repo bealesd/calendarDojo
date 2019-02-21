@@ -31,32 +31,32 @@
 <body>
     <div class="navbar">
         <a id="calendar">calendar</a>
-        <a id="test">test</a>
         <a id="trends">trends</a>
         <div class="subMenu"></div>
     </div>
 
+    <div>
+        <a id="neonToggle"><span class="glyphicon glyphicon-off"></span></a>
+    </div>
+
     <div class="main calendar" style="display:none;">
         <p id="calendarStatus"></p>
-        <heading id="date"></heading>
+        <p class="heading" id="date"></p>
         <br>
         <br>
         <div id="calendarContainer"></div>
     </div>
 
     <div class="main trends" style="display:none;">
-        <p>Calendar Trends</p>
-    </div>
-
-    <div class="main test" style="display:none;">
-        <p>Test</p>
+        <div id="trendsContainer">
+            <p>This page is not ready yet!</p>
+        </div>
     </div>
 
     <div id="dataStore"></div>
 
     <form id="addOrEditCalendarEvents"
           style="background-color:#FFFFFF; padding:30px; position: absolute; opacity: 50; z-index: 950; display: none;">
-        <!-- style="background-color:#FFFFFF; margin: auto; width: 50%; padding:30px; position: absolute; opacity: 50; width: 298px;height: 267.4px; left: 174px; top: 49px;z-index: 950; display: none;">-->
         <h3 id="formTitle">Title</h3>
         <div hidden id="eventId"></div>
         <input id="eventTitle" type="text" name="title" placeholder="title"><br>
@@ -66,8 +66,8 @@
 
         <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox" name="checkbox"><br></span>
         <div id="dateRange">
-        <input id="eventFrom" type="date" name="date"><br>
-        <input id="eventTo" type="date" name="date"><br>
+            <input id="eventFrom" type="date" name="date"><br>
+            <input id="eventTo" type="date" name="date"><br>
         </div>
 
         <button id='eventAddOrUpdateButton' type="button">Add</button>
@@ -84,6 +84,15 @@
         this.callbackController.intialize(this.callbackService);
 
         DataStore.addJson({ currentPage: 'calendar' });
+
+
+        $("#neonToggle").on("click", function () {
+            if (document.getElementsByClassName('heading')[0].classList.contains('headingAnimation'))
+                document.getElementsByClassName('heading')[0].classList.remove('headingAnimation');
+            else
+                document.getElementsByClassName('heading')[0].classList.add('headingAnimation');
+        }.bind(this));
+
     </script>
 
 </body>

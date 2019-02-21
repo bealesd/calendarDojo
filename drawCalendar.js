@@ -45,7 +45,9 @@ class DrawCalendar {
         this.setColors();
     }
 
-    highlightCurrentDay(day) { document.getElementById(`${day}`).classList.add('highlightBlock'); }
+    highlightCurrentDay(day) {
+        document.getElementById(`${day}`).classList.add('highlightBlock');
+    }
 
     calculateBlockHeight() {
         var calendarArray = DataStore.getCurrentMonthCalendarRecords();

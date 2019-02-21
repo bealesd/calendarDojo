@@ -131,10 +131,6 @@ body {
         background-color: #34CACA;
     }
 
-
-
-
-
 .button {
     -moz-box-shadow: inset 0px 1px 0px 0px #45D6D6;
     -webkit-box-shadow: inset 0px 1px 0px 0px #45D6D6;
@@ -161,16 +157,20 @@ body {
     font-size: 13px;
 }
 
-heading {
+.heading {
     color: white;
     text-align: center;
-    -webkit-animation: neon6 1.5s ease-in-out infinite alternate;
     font-size: 50px;
     padding-left: 10px;
 }
 
+.headingAnimation {
+    -webkit-animation: neon6 1.5s ease-in-out infinite alternate;
+}
+
 .highlightBlock {
-    -webkit-animation: neonBox2 3s ease-in-out infinite alternate;
+    /*-webkit-animation: neonBox2 3s ease-in-out infinite alternate;*/
+    background-color: midnightblue;
 }
 
 .main {
