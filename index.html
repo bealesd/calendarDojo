@@ -1,4 +1,6 @@
-﻿<html>
+﻿<!DOCTYPE html>
+
+<html lang="en">
 
 <head>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
@@ -76,6 +78,14 @@
     </form>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./serviceWorker.js', { scope: './' }).then(function (registration) {
+                console.log('Service worker registration succeeded:', registration);
+            }, function (error) {
+                console.log('Service worker registration failed:', error);
+            });
+        }
+
         this.callbackService = CallbackService();
         this.calendarController = new CalendarController(callbackService.registerSubMenuCallbacks, callbackService.registerTabCallbacks);
         this.calendarController.registerCalendarCallbacks();
