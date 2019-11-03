@@ -1,6 +1,6 @@
-class CustomEvents {
+export class CustomEvents {
     static onClick(element, callback, callbackArgs) {
-        var clickEvents = ["mousedown"/*, "touchstart", "pointer.down"*/];
+        const clickEvents = ["mousedown"];
         clickEvents.forEach(function (event) {
             $(element).on(event, function () {
                 callback(callbackArgs);
@@ -13,7 +13,7 @@ class CustomEvents {
     }
 
     static onMouseOver(element, callback, callbackArgs) {
-        var clickEvents = ["mouseover"];
+        const clickEvents = ["mouseover"];
         clickEvents.forEach(function (event) {
             element.addEventListener(event, function () {
                 callback(callbackArgs);
@@ -22,7 +22,7 @@ class CustomEvents {
     }
 
     static onMouseOut(element, callback, callbackArgs) {
-        var clickEvents = ["mouseout"];
+        const clickEvents = ["mouseout"];
         clickEvents.forEach(function (event) {
             element.addEventListener(event, function () {
                 callback(callbackArgs);

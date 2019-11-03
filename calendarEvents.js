@@ -1,4 +1,8 @@
-class CalendarEvents {
+import { DataStore } from './dataStore.js';
+import { FormHelper } from './formHelper.js';
+import { CustomEvents } from './customEvents.js';
+
+export class CalendarEvents {
     constructor() {
         this.calendarFormId = 'addOrEditCalendarEvents';
     }
@@ -13,7 +17,7 @@ class CalendarEvents {
 
     onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            var calendarEvent = DataStore.getCurrentMonthCalendarRecords()[calendarEventTitle.id];
+            var calendarEvent = DataStore.getValue('currentMonthCalendarRecords')[calendarEventTitle.id];
             $(calendarEventTitle).off();
             CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
 
@@ -50,28 +54,30 @@ class CalendarEvents {
 
     deleteCalendarEvent(self) {
         this.calendarController = self;
-        var id = document.getElementById('eventId').value;
-        this.calendarController.calendarService.delete(id).then(() => {
-            this.calendarController.calendarService.get().then(() => {
+        const id = document.getElementById('eventId').value;
+        this.calendarController.calendarService.delete(id)
+            .then(() => {
+                return this.calendarController.calendarService.get();
+            })
+            .then(() => {
                 FormHelper.hideForm(this.calendarFormId);
                 this.calendarController.loadCalendarPage();
             });
-        });
     }
 
     createOrUpdateCalendarEvent(self) {
         this.calendarController = self;
-        var title = document.getElementById("eventTitle").value;
-        var time = document.getElementById("eventTime").value;
-        var who = document.getElementById("eventWho").value;
-        var where = document.getElementById("eventWhere").value;
-        var id = document.getElementById("eventId").value;
+        const title = document.getElementById("eventTitle").value;
+        const time = document.getElementById("eventTime").value;
+        const who = document.getElementById("eventWho").value;
+        const where = document.getElementById("eventWhere").value;
+        const id = document.getElementById("eventId").value;
 
         if (title.trim().length === 0 || who.trim().length === 0 || where.trim().length === 0) {
             alert('form incomplete');
             return false;
         }
-        var isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value);
+        const isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value);
 
         if (this.isMultipleDaysSelected() && !isValidDateRange) {
             alert('invalid date');
@@ -82,8 +88,10 @@ class CalendarEvents {
             this.createMultipleDaysCalendarEvent(this.calendarController, title, time, who, where, id);
         }
         else {
-            this.calendarController.calendarService.post(title, time, who, where, id).then(() => {
-                this.calendarController.calendarService.get().then(() => {
+            this.calendarController.calendarService.post(title, time, who, where, id)
+                .then(() => {
+                    this.calendarController.calendarService.get()
+                .then(() => {
                     FormHelper.hideForm(this.calendarFormId);
                     this.calendarController.loadCalendarPage();
                 });
@@ -93,20 +101,22 @@ class CalendarEvents {
     }
 
     createMultipleDaysCalendarEvent(calendarController, title, time, who, where, id) {
-        var dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
+        const dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
         var index = 0;
         for (var i = 0; i < dates.length; i++) {
             index = i;
             var day = dates[i].getDate();
             var month = dates[i].getMonth() + 1;
             var year = dates[i].getFullYear();
-            calendarController.calendarService.postWithDate(title, time, who, where, id, day, month, year).then(() => {
-                if (index === (dates.length - 1)) {
-                    calendarController.calendarService.get().then(() => {
-                        FormHelper.hideForm(this.calendarFormId);
-                        calendarController.loadCalendarPage();
-                    });
-                }
+            calendarController.calendarService.postWithDate(title, time, who, where, id, day, month, year)
+                .then(() => {
+                    if (index === (dates.length - 1)) {
+                        calendarController.calendarService.get()
+                            .then(() => {
+                                FormHelper.hideForm(this.calendarFormId);
+                                calendarController.loadCalendarPage();
+                        });
+                    }
             });
         }
     }
@@ -134,7 +144,7 @@ class CalendarEvents {
         $('#multipleDays').hide();
         $('#dateRange').hide();
 
-        DataStore.addJson({ day: calendarEvent.day });
+        DataStore.setValue('day', calendarEvent.day);
         this.setCalendarFormType('Update');
         this.setCalendarFormValues(`Update event on ${calendarEvent.day}`,
             calendarEvent.title,
@@ -151,7 +161,7 @@ class CalendarEvents {
         $('#multipleDays').show();
         $('#dateRange').hide();
 
-        document.getElementById('date').value = DataStore.addJson({ day: day });
+        document.getElementById('date').value = DataStore.setValue('day', day);
         this.setCalendarFormType('Add');
         this.setCalendarFormValues(`Add event for day ${day}`, '', '10:00', '', '', '');
         this.setCalendarFormPosition();

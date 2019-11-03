@@ -1,4 +1,7 @@
-class MenuEvents {
+import { DataStore } from './dataStore.js';
+import { CustomEvents } from './customEvents.js';
+
+export class MenuEvents {
     constructor() {
     }
 
@@ -10,9 +13,9 @@ class MenuEvents {
                 link.style.backgroundColor = "black";
             });
             CustomEvents.onMouseOut(link, function () {
-                if (DataStore.getJson().currentPage === link.id)
+                if (DataStore.getValue('currentPage') === link.id)
                     link.style.backgroundColor = "darkred";
-                if (DataStore.getJson().currentPage !== link.id)
+                if (DataStore.getValue('currentPage') !== link.id)
                     link.style.backgroundColor = "#333";
             });
         }.bind(this));
@@ -30,7 +33,7 @@ class MenuEvents {
     }
 
     getCurrentTab() {//move to static helper
-        return document.querySelectorAll(`.navbar #${DataStore.getJson('currentPage').currentPage}`)[0];
+        return document.querySelectorAll(`.navbar #${DataStore.getValue('currentPage')}`)[0];
     }
 
     onSubMenuLinkHover() {

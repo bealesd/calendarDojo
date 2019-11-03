@@ -1,4 +1,4 @@
-class WebTimeHelper {
+export class WebTimeHelper {
     static webTimeToArray(time) {
         //format is "10:39 PM"
         var timeSplit = [parseInt(time.split(':')[0]), parseInt(time.split(':')[1].split(" ")[0]), time.split(':')[1].split(" ")[1]];

@@ -1,8 +1,13 @@
-class DateHelper {
+export class DateHelper {
     constructor() {
-        this.initializeMonthDictionary();
-        this.initializeDaysDictionary();
-        this.date = new Date();
+        if (!DateHelper.instance){
+            DateHelper.instance = this;
+
+            this.initializeMonthDictionary();
+            this.initializeDaysDictionary();
+            this.date = new Date();
+        }
+        return DateHelper.instance;
     }
 
     initializeMonthDictionary() {
@@ -33,8 +38,8 @@ class DateHelper {
     }
 
     updateDate(isNextMonth) {
-        var month = this.date.getMonth();
-        var year = this.date.getFullYear();
+        let month = this.date.getMonth();
+        let year = this.date.getFullYear();
         if (isNextMonth) {
             if (month === 11) {
                 month = 0;
@@ -54,8 +59,8 @@ class DateHelper {
     }
 
     getDaysNames() {
-        var daysInMonth = this.getDaysInMonth();
-        var daysNames = new Array(daysInMonth);
+        const daysInMonth = this.getDaysInMonth();
+        let daysNames = new Array(daysInMonth);
         for (var i = 1; i <= daysInMonth; i++) {
             var day = new Date(this.getYear(), this.getMonthNumber(), i).getDay();
             daysNames[i] = this.daysDictionary[day % 7];
@@ -64,7 +69,7 @@ class DateHelper {
     }
 
     getTodaysDate() {
-        var date = new Date();
+        let date = new Date();
         return { day: date.getDate(), month: date.getMonth(), year: date.getFullYear() };
     }
 

@@ -1,38 +1,31 @@
-class CalendarController {
-    constructor(registerSubMenuCallbacks, registerTabCallbacks) {
-        this.calendarService = new CalendarService();
-        this.calendarService.calendarRepo = new CalendarRepo();
-        this.calendarService.drawCalendarService = new DrawCalendar();
-        this.calendarService.dateHelper = new DateHelper();
-        this.calendarService.calendarTimer = new CalendarTimer();
-        this.registerTabCallbacks = registerTabCallbacks;
-        this.registerSubMenuCallbacks = registerSubMenuCallbacks;
-        this.calendarEventsRegistered = false;
-        this.calendarFormId = 'addOrEditCalendarEvents';
-        this.calendarEvents = new CalendarEvents();
+import { CalendarEvents } from './calendarEvents.js';
+import { CalendarService } from './calendarService.js'
+import { MenuEvents } from './menuEvents.js';
+import { CalendarSubMenu } from './calendarSubMenu.js';
+
+export class CalendarController {
+    constructor() {
+        if (!CalendarController.instance) {
+            CalendarController.instance = this;
+
+            this.calendarService = new CalendarService();
+            this.calendarEventsRegistered = false;
+            this.calendarFormId = 'addOrEditCalendarEvents';
+            this.calendarEvents = new CalendarEvents();
+        }
+        return CalendarController.instance;
     }
 
-    registerCalendarCallbacks() {
-        this.calendarSubMenu = CalendarSubMenu();
-        this.registerTabCallbacks(this.calendarPageCallback.bind(this), 'calendar');
-        this.registerSubMenuCallbacks(function() {
-            this.calendarSubMenu.calendarSubMenuCallback.call(this);
-        }.bind(this), 'calendar');
-    }
-
-    //#region calendar page setup
-    calendarPageCallback() {
-        if (DataStore.getJson().allCalendarRecords === undefined) {
-            this.calendarService.get().then(() => {
+    loadPage() {
+        this.calendarService.get()
+            .then(() => {
                 this.loadCalendarPage();
-            });
-        }
-        else {
-            this.loadCalendarPage();
-        }
+                new MenuEvents().setupMenuEvents();
+                new CalendarSubMenu().calendarSubMenuCallback();
+            })
     }
 
-    loadCalendarPage() {
+    loadCalendarPage(){
         this.calendarService.drawCalendar();
         this.registerCalendarPageEventListeners();
     }
@@ -45,5 +38,4 @@ class CalendarController {
         this.calendarEvents.onCreateOrUpdateCalendarEventClick(this);
         this.calendarEvents.onMultipleCalendarDaysEventClick();
     }
-    //#endregion
 }

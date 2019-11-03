@@ -1,14 +1,18 @@
-class CalendarService {
+import { DataStore } from './dataStore.js';
+import { DateHelper } from './dateHelper.js';
+import { CalendarHelper } from './calendarHelper.js';
+import { CalendarRepo } from './calendarRepo.js';
+import { DrawCalendar } from './drawCalendar.js';
+
+export class CalendarService {
     constructor() {
-        //classes
-        this.drawCalendarService = null;
-        this.dateHelper = null;
-        this.calendarRepo = null;
-        this.calendarTimer = null;
+        this.drawCalendarService = new DrawCalendar;
+        this.dateHelper = new DateHelper();
+        this.calendarRepo = new CalendarRepo();
     }
 
     post(title, time, who, where, id) {
-        return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getJson().day);
+        return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getValue('day'));
     }
 
     postWithDate(title, time, who, where, id, day, month, year) {
@@ -19,49 +23,38 @@ class CalendarService {
         return this.calendarRepo.deleteData(id);
     }
 
-    get() {//TODO: rename to start calendar, it gets and controls timer
-        this.calendarTimer.startGetCalendarTimer();
+    get() {
         return new Promise(function (res, rej) {
-            if (window.getCalled === true) {
-                this.calendarTimer.stopGetCalendarTimer();
-            }
             this.calendarRepo.getData().then(function (results) {
-                DataStore.addJson({ allCalendarRecords: results });
-                window.getCalled = true;
+                DataStore.setValue('allCalendarRecords', results);
                 this.setCalendarEventsForCurrentMonth(results);
-                this.calendarTimer.stopGetCalendarTimer();
                 res(`'getData' retrieved: ${results.length} calendar events.`);
-            }.bind(this), function (err) {
-                this.calendarTimer.stopGetCalendarTimer();
-                this.calendarTimer.setCalendarStatusText('Could not get calendar data.');
-                rej(err);
-            });
-
+            }.bind(this));
         }.bind(this));
     }
 
     parseDateFromString(dateString) {
-        var date = new Date();
-        var year = dateString.split('/')[0];
-        var month = dateString.split('/')[1] - 1;
-        var day = dateString.split('/')[2];
+        let date = new Date();
+        const year = dateString.split('/')[0];
+        const month = dateString.split('/')[1] - 1;
+        const day = dateString.split('/')[2];
         date.setFullYear(year, month, day);
         return date;
     }
 
     getCurrentMonthRecords(allCalendarRecords) {
-        var currentMonthCalendarEvents = {};
-        var eventsPerDay = {};
-        for (var i = 0; i < allCalendarRecords.length; i++) {
-            var calendarEventDate = this.parseDateFromString(allCalendarRecords[i].date);
-            var eventIsCurrentMonth = calendarEventDate.getFullYear() === this.dateHelper.getYear() && calendarEventDate.getMonth() === this.dateHelper.getMonthNumber();
+        let currentMonthCalendarEvents = {};
+        let eventsPerDay = {};
+        for (let i = 0; i < allCalendarRecords.length; i++) {
+            const calendarEventDate = this.parseDateFromString(allCalendarRecords[i].date);
+            const eventIsCurrentMonth = calendarEventDate.getFullYear() === this.dateHelper.getYear() && calendarEventDate.getMonth() === this.dateHelper.getMonthNumber();
             if (eventIsCurrentMonth) {
                 if (eventsPerDay[calendarEventDate.getDate()] === undefined)
                     eventsPerDay[calendarEventDate.getDate()] = 1;
                 else
                     eventsPerDay[calendarEventDate.getDate()] += 1;
 
-                var calendarEvent = {
+                const calendarEvent = {
                     'id': allCalendarRecords[i].id,
                     'title': allCalendarRecords[i].title,
                     'time': allCalendarRecords[i].time,
@@ -77,15 +70,15 @@ class CalendarService {
     }
 
     setCalendarEventsForCurrentMonth() {
-        var currentMonthCalendarRecords = this.getCurrentMonthRecords(DataStore.getJson()['allCalendarRecords']);
-        DataStore.addCurrentMonthCalendarRecords(this.sortCalendarEvents(currentMonthCalendarRecords));
+        var currentMonthCalendarRecords = this.getCurrentMonthRecords(DataStore.getValue('allCalendarRecords'));
+        DataStore.setValue('currentMonthCalendarRecords', this.sortCalendarEvents(currentMonthCalendarRecords));
     }
 
     sortCalendarEvents(calendarEventJson) {
-        var calendarEventsArray = [];
+        let calendarEventsArray = [];
         Object.keys(calendarEventJson).forEach(function (id) { calendarEventsArray.push(calendarEventJson[id]); });
         calendarEventsArray.sort(CalendarHelper.compareByTime);
-        var soughtedCalendarEventJson = {};
+        let soughtedCalendarEventJson = {};
         calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event.id] = event; });
         return soughtedCalendarEventJson;
     }

@@ -1,9 +1,11 @@
-class CalendarHelper {
+import { WebTimeHelper } from './webTimeHelper.js';
+
+export class CalendarHelper {
     static compareCalendarEventsByTime(calendarEventOne, calendarEventTwo) {
-        var timeOneHours = WebTimeHelper.webTimeToString(calendarEventOne.time)[0];
-        var timeOneMins = WebTimeHelper.webTimeToString(calendarEventOne.time)[1];
-        var timeTwoHours = WebTimeHelper.webTimeToString(calendarEventTwo.time)[0];
-        var timeTwoMins = WebTimeHelper.webTimeToString(calendarEventTwo.time)[1];
+        let timeOneHours = WebTimeHelper.webTimeToString(calendarEventOne.time)[0];
+        let timeOneMins = WebTimeHelper.webTimeToString(calendarEventOne.time)[1];
+        let timeTwoHours = WebTimeHelper.webTimeToString(calendarEventTwo.time)[0];
+        let timeTwoMins = WebTimeHelper.webTimeToString(calendarEventTwo.time)[1];
 
         if (timeOneHours < timeTwoHours) return -1;
         else if (timeOneHours > timeTwoHours) return 1;
@@ -22,4 +24,13 @@ class CalendarHelper {
         document.getElementsByClassName('subMenu')[0].innerHTML = '';
     }
 
+    static resizeThrottler(callback) {
+        let resizeTimeout;
+        if (!resizeTimeout) {
+            resizeTimeout = setTimeout(function () {
+                resizeTimeout = null;
+                callback();
+            }.bind(this), 66);
+        }
+    }
 }

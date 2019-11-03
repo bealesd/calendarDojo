@@ -12,9 +12,6 @@ self.addEventListener('install', event => {
                     './calendarRepo.js',
                     './calendarService.js',
                     './calendarSubMenu.js',
-                    './calendarTimer.js',
-                    './callbackController.js',
-                    './callbackService.js',
                     './customEvents.js',
                     './style.css',
                     './dataStore.js',
@@ -48,6 +45,9 @@ self.addEventListener('fetch', event => {
     const url = new URL(req.url);
     if (req.method.toLowerCase() === "get") {
         return event.respondWith(networkElseCache(event));
+    }
+    else if (req.method.toLowerCase() === "post" ||eq.method.toLowerCase() === "delete"  ||eq.method.toLowerCase() === "put" ) {
+        return;
     }
     else if (url.origin.toLowerCase() !== 'https://calservice.azurewebsites.net/') {
         return cacheFirst(event);

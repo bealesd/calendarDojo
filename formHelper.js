@@ -1,4 +1,4 @@
-class FormHelper {
+export class FormHelper {
     static hideForm(formId) {
         document.getElementById(formId).style.display = 'none';
     }
