@@ -11,12 +11,12 @@ export class CalendarService {
         this.calendarRepo = new CalendarRepo();
     }
 
-    post(title, time, who, where, id) {
-        return this.calendarRepo.postData(title, time, who, where, id, this.dateHelper.date, DataStore.getValue('day'));
+    post(title, time, id) {
+        return this.calendarRepo.postData(title, time, id, this.dateHelper.date, DataStore.getValue('day'));
     }
 
-    postWithDate(title, time, who, where, id, day, month, year) {
-        return this.calendarRepo.postDataWithDate(title, time, who, where, id, day, month, year);
+    postWithDate(title, time, id, day, month, year) {
+        return this.calendarRepo.postDataWithDate(title, time, id, day, month, year);
     }
 
     delete(id) {
@@ -58,8 +58,6 @@ export class CalendarService {
                     'id': allCalendarRecords[i].id,
                     'title': allCalendarRecords[i].title,
                     'time': allCalendarRecords[i].time,
-                    'who': allCalendarRecords[i].who,
-                    'where': allCalendarRecords[i].where,
                     'day': calendarEventDate.getDate(),
                     'slot': eventsPerDay[calendarEventDate.getDate()]
                 };

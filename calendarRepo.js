@@ -8,13 +8,11 @@ export class CalendarRepo {
         .then((response)=>{return response.json();})
     }
 
-    postData(title, time, who, where, id = "", date, dayClicked) {
+    postData(title, time, id = "", date, dayClicked) {
         const jsonData = {
             title: `${title}`,
             date: `${date.getFullYear()}/${date.getMonth() + 1}/${dayClicked}`,
             time: `${time}`,
-            who: `${who}`,
-            where: `${where}`,
             id: `${id}`
         };
         return fetch(this.calendarRepoUrl, {
@@ -26,13 +24,11 @@ export class CalendarRepo {
         });
     }
 
-    postDataWithDate(title, time, who, where, id = "", day, month, year) {
+    postDataWithDate(title, time, id = "", day, month, year) {
         const jsonData = {
             title: `${title}`,
             date: `${year}/${month}/${day}`,
             time: `${time}`,
-            who: `${who}`,
-            where: `${where}`,
             id: `${id}`
         };
 

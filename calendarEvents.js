@@ -69,11 +69,9 @@ export class CalendarEvents {
         this.calendarController = self;
         const title = document.getElementById("eventTitle").value;
         const time = document.getElementById("eventTime").value;
-        const who = document.getElementById("eventWho").value;
-        const where = document.getElementById("eventWhere").value;
         const id = document.getElementById("eventId").value;
 
-        if (title.trim().length === 0 || who.trim().length === 0 || where.trim().length === 0) {
+        if (title.trim().length === 0) {
             alert('form incomplete');
             return false;
         }
@@ -85,10 +83,10 @@ export class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected()) {
-            this.createMultipleDaysCalendarEvent(this.calendarController, title, time, who, where, id);
+            this.createMultipleDaysCalendarEvent(this.calendarController, title, time, id);
         }
         else {
-            this.calendarController.calendarService.post(title, time, who, where, id)
+            this.calendarController.calendarService.post(title, time, id)
                 .then(() => {
                     this.calendarController.calendarService.get()
                 .then(() => {
@@ -100,7 +98,7 @@ export class CalendarEvents {
         return false;
     }
 
-    createMultipleDaysCalendarEvent(calendarController, title, time, who, where, id) {
+    createMultipleDaysCalendarEvent(calendarController, title, time, id) {
         const dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
         var index = 0;
         for (var i = 0; i < dates.length; i++) {
@@ -108,7 +106,7 @@ export class CalendarEvents {
             var day = dates[i].getDate();
             var month = dates[i].getMonth() + 1;
             var year = dates[i].getFullYear();
-            calendarController.calendarService.postWithDate(title, time, who, where, id, day, month, year)
+            calendarController.calendarService.postWithDate(title, time, id, day, month, year)
                 .then(() => {
                     if (index === (dates.length - 1)) {
                         calendarController.calendarService.get()
@@ -149,8 +147,6 @@ export class CalendarEvents {
         this.setCalendarFormValues(`Update event on ${calendarEvent.day}`,
             calendarEvent.title,
             calendarEvent.time,
-            calendarEvent.where,
-            calendarEvent.who,
             calendarEvent.id);
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId);
@@ -180,13 +176,11 @@ export class CalendarEvents {
         }
     }
 
-    setCalendarFormValues(formTitle, eventTitle, time, where, who, id) {
+    setCalendarFormValues(formTitle, eventTitle, time, id) {
         document.getElementById('eventId').value = id;
         document.getElementById('formTitle').innerHTML = formTitle;
         this.updateInputNode('eventTitle', eventTitle, 'title');
         this.updateInputNode('eventTime', time, '');
-        this.updateInputNode('eventWhere', where, 'where');
-        this.updateInputNode('eventWho', who, 'who');
     }
 
     setCalendarFormPosition() {
