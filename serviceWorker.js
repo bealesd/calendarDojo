@@ -46,7 +46,7 @@ self.addEventListener('fetch', event => {
     if (req.method.toLowerCase() === "get") {
         return event.respondWith(networkElseCache(event));
     }
-    else if (req.method.toLowerCase() === "post" ||eq.method.toLowerCase() === "delete"  ||eq.method.toLowerCase() === "put" ) {
+    else if (req.method.toLowerCase() === "post" || req.method.toLowerCase() === "delete" || req.method.toLowerCase() === "put") {
         return;
     }
     else if (url.origin.toLowerCase() !== 'https://calservice.azurewebsites.net/') {

@@ -1,5 +1,4 @@
 import { DataStore } from './dataStore.js';
-import { WebTimeHelper } from './webTimeHelper.js';
 
 export class DrawCalendar {
     constructor() {
@@ -70,7 +69,7 @@ export class DrawCalendar {
 
     createCalendarDayRow(calendarEvent) {
         return `<tr><td class="calendarEventTitle" id='${calendarEvent.id}'>
-                ${WebTimeHelper.webTimeToString(calendarEvent.time)}&nbsp<em>${calendarEvent.title}</em>
+                ${calendarEvent.time}&nbsp<em>${calendarEvent.title}</em>
                 </td></tr>`;
     }
 

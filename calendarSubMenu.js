@@ -5,14 +5,13 @@ import { DateHelper } from './dateHelper.js';
 export class CalendarSubMenu {
     constructor() {
         this.calendarService = new CalendarService();
-        this.dateHelper = new DateHelper();
         this.calendarController = new CalendarController();
     }
 
     calendarSubMenuHtml() {
         const height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
-        const previousMonthHtml = `<a style='height:${height}'  class="calendar" id="nextMonth"><span class="glyphicon glyphicon-menu-left"></span></a>`;
-        const nextMonthHtml = `<a style='height:${height}'  class="calendar" id="previousMonth"><span class="glyphicon glyphicon-menu-right"></span></a>`;
+        const previousMonthHtml = `<a style='height:${height}' class="calendar" id="previousMonth"><span class="glyphicon glyphicon-menu-left"></span></a>`;
+        const nextMonthHtml = `<a style='height:${height}' class="calendar" id="nextMonth"><span class="glyphicon glyphicon-menu-right"></span></a>`;
         return previousMonthHtml + nextMonthHtml;
     }
 
@@ -27,13 +26,13 @@ export class CalendarSubMenu {
     }
 
     calendarBackwards() {
-        this.dateHelper.updateDate(true);
+        DateHelper.updateDate(false);
         this.calendarService.setCalendarEventsForCurrentMonth();
         this.calendarController.loadCalendarPage();
     }
 
     calendarForwards() {
-        this.dateHelper.updateDate(false);
+        DateHelper.updateDate(true);
         this.calendarService.setCalendarEventsForCurrentMonth();
         this.calendarController.loadCalendarPage();
     }

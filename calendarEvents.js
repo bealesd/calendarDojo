@@ -1,6 +1,8 @@
 import { DataStore } from './dataStore.js';
 import { FormHelper } from './formHelper.js';
 import { CustomEvents } from './customEvents.js';
+import { DateHelper } from './dateHelper.js';
+import { WebTimeHelper } from './webTimeHelper.js';
 
 export class CalendarEvents {
     constructor() {
@@ -17,7 +19,7 @@ export class CalendarEvents {
 
     onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            var calendarEvent = DataStore.getValue('currentMonthCalendarRecords')[calendarEventTitle.id];
+            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords')[calendarEventTitle.id];
             $(calendarEventTitle).off();
             CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
 
@@ -71,6 +73,17 @@ export class CalendarEvents {
         const time = document.getElementById("eventTime").value;
         const id = document.getElementById("eventId").value;
 
+        const hoursAndMinutesArray = WebTimeHelper.webTimeToArray(time);
+        DateHelper.setHour(hoursAndMinutesArray[0]);
+        DateHelper.setMinute(hoursAndMinutesArray[1]);
+
+        const year = DateHelper.getYear();
+        const month = DateHelper.getMonthNumber();
+        const day = DateHelper.getDay();
+        const hours = DateHelper.getHour();
+        const minutes = DateHelper.getMinute();
+        let date = DateHelper.getDate(year, month, day, hours, minutes);
+
         if (title.trim().length === 0) {
             alert('form incomplete');
             return false;
@@ -83,10 +96,10 @@ export class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected()) {
-            this.createMultipleDaysCalendarEvent(this.calendarController, title, time, id);
+            this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         }
         else {
-            this.calendarController.calendarService.post(title, time, id)
+            this.calendarController.calendarService.post(title, date.getTime(), id)
                 .then(() => {
                     this.calendarController.calendarService.get()
                 .then(() => {
@@ -98,15 +111,20 @@ export class CalendarEvents {
         return false;
     }
 
-    createMultipleDaysCalendarEvent(calendarController, title, time, id) {
+    createMultipleDaysCalendarEvent(calendarController, title, id) {
         const dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
-        var index = 0;
-        for (var i = 0; i < dates.length; i++) {
+        let index = 0;
+        for (let i = 0; i < dates.length; i++) {
             index = i;
-            var day = dates[i].getDate();
-            var month = dates[i].getMonth() + 1;
-            var year = dates[i].getFullYear();
-            calendarController.calendarService.postWithDate(title, time, id, day, month, year)
+
+            const day = dates[i].getDate();
+            const month = dates[i].getMonth();
+            const year = dates[i].getFullYear();
+            const hours = DateHelper.getHour();
+            const minutes = DateHelper.getMinute();
+            let date = DateHelper.getDate(year, month, day, hours, minutes);
+
+            calendarController.calendarService.post(title, date.getTime(), id)
                 .then(() => {
                     if (index === (dates.length - 1)) {
                         calendarController.calendarService.get()
@@ -120,8 +138,8 @@ export class CalendarEvents {
     }
 
     getDates(startDate, stopDate) {
-        var dateArray = new Array();
-        var currentDate = startDate;
+        let dateArray = new Array();
+        let currentDate = startDate;
         while (currentDate <= stopDate) {
             dateArray.push(new Date(currentDate));
             currentDate = this.addDays(currentDate);
@@ -142,7 +160,7 @@ export class CalendarEvents {
         $('#multipleDays').hide();
         $('#dateRange').hide();
 
-        DataStore.setValue('day', calendarEvent.day);
+        DateHelper.setDay(calendarEvent.day);
         this.setCalendarFormType('Update');
         this.setCalendarFormValues(`Update event on ${calendarEvent.day}`,
             calendarEvent.title,
@@ -157,7 +175,7 @@ export class CalendarEvents {
         $('#multipleDays').show();
         $('#dateRange').hide();
 
-        document.getElementById('date').value = DataStore.setValue('day', day);
+        DateHelper.setDay(day);
         this.setCalendarFormType('Add');
         this.setCalendarFormValues(`Add event for day ${day}`, '', '10:00', '', '', '');
         this.setCalendarFormPosition();
@@ -184,19 +202,19 @@ export class CalendarEvents {
     }
 
     setCalendarFormPosition() {
-        var yOffset = window.pageYOffset;
-        var windowHeight = window.innerHeight;
-        var windowWidth = window.innerWidth;
-        var formWidth = '298';
-        var formHeight = '267.4';
-        var style = document.getElementById(this.calendarFormId).style;
+        const yOffset = window.pageYOffset;
+        const windowHeight = window.innerHeight;
+        const windowWidth = window.innerWidth;
+        const formWidth = '298';
+        const formHeight = '267.4';
+        const style = document.getElementById(this.calendarFormId).style;
 
         style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
         style.left = `${(windowWidth - formWidth) / 2}px`;
     }
 
     updateInputNode(id, value, placeholder) {
-        var inputNode = document.getElementById(id);
+        const inputNode = document.getElementById(id);
         inputNode.value = value;
         inputNode.placeholder = placeholder;
     }

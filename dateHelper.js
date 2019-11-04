@@ -1,45 +1,38 @@
+import { DataStore } from './dataStore.js';
+
 export class DateHelper {
-    constructor() {
-        if (!DateHelper.instance){
-            DateHelper.instance = this;
-
-            this.initializeMonthDictionary();
-            this.initializeDaysDictionary();
-            this.date = new Date();
-        }
-        return DateHelper.instance;
+    static monthDictionary() {
+        let months = [];
+        months.push("January");
+        months.push("February");
+        months.push("March");
+        months.push("April");
+        months.push("May");
+        months.push("June");
+        months.push("July");
+        months.push("August");
+        months.push("September");
+        months.push("October");
+        months.push("November");
+        months.push("December");
+        return months;
     }
 
-    initializeMonthDictionary() {
-        this.monthDictionary = new Array(12);
-        this.monthDictionary[0] = "January";
-        this.monthDictionary[1] = "February";
-        this.monthDictionary[2] = "March";
-        this.monthDictionary[3] = "April";
-        this.monthDictionary[4] = "May";
-        this.monthDictionary[5] = "June";
-        this.monthDictionary[6] = "July";
-        this.monthDictionary[7] = "August";
-        this.monthDictionary[8] = "September";
-        this.monthDictionary[9] = "October";
-        this.monthDictionary[10] = "November";
-        this.monthDictionary[11] = "December";
+    static daysDictionary() {
+        let days = [];
+        days.push("Sunday");
+        days.push("Monday");
+        days.push("Tuesday");
+        days.push("Wednesday");
+        days.push("Thursday");
+        days.push("Friday");
+        days.push("Saturday");
+        return days;
     }
 
-    initializeDaysDictionary() {
-        this.daysDictionary = new Array(7);
-        this.daysDictionary[0] = "Sunday";
-        this.daysDictionary[1] = "Monday";
-        this.daysDictionary[2] = "Tuesday";
-        this.daysDictionary[3] = "Wednesday";
-        this.daysDictionary[4] = "Thursday";
-        this.daysDictionary[5] = "Friday";
-        this.daysDictionary[6] = "Saturday";
-    }
-
-    updateDate(isNextMonth) {
-        let month = this.date.getMonth();
-        let year = this.date.getFullYear();
+    static updateDate(isNextMonth) {
+        let month = DataStore.getValue('month');
+        let year = DataStore.getValue('year');
         if (isNextMonth) {
             if (month === 11) {
                 month = 0;
@@ -54,42 +47,72 @@ export class DateHelper {
             }
             else month -= 1;
         }
-        this.date.setMonth(month);
-        this.date.setFullYear(year);
+        DataStore.setValue('month', month);
+        DataStore.setValue('year', year);
     }
 
-    getDaysNames() {
-        const daysInMonth = this.getDaysInMonth();
+    static getDate(year, month, day, hours, minutes) {
+        let date = new Date();
+        date.setMinutes(minutes);
+        date.setHours(hours);
+        date.setDate(day);
+        date.setMonth(month);
+        date.setFullYear(year);
+        return date;
+    }
+
+    static getDaysNames() {
+        const daysInMonth = DateHelper.getDaysInMonth();
         let daysNames = new Array(daysInMonth);
-        for (var i = 1; i <= daysInMonth; i++) {
-            var day = new Date(this.getYear(), this.getMonthNumber(), i).getDay();
-            daysNames[i] = this.daysDictionary[day % 7];
+        for (let i = 1; i <= daysInMonth; i++) {
+            const day = new Date(DateHelper.getYear(), DateHelper.getMonthNumber(), i).getDay();
+            daysNames[i] = DateHelper.daysDictionary()[day % 7];
         }
         return daysNames;
     }
 
-    getTodaysDate() {
+    static getTodaysDate() {
         let date = new Date();
         return { day: date.getDate(), month: date.getMonth(), year: date.getFullYear() };
     }
 
-    getDaysInMonth() {
-        return new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0).getDate();
+    static getDaysInMonth() {
+        return new Date(DataStore.getValue('year'), DataStore.getValue('month') + 1, 0).getDate();
     }
 
-    getMonthNumber() {
-        return this.date.getMonth();
+    static getMonthNumber() {
+        return DataStore.getValue('month');
     }
 
-    getMonthName() {
-        return this.monthDictionary[this.getMonthNumber()];
+    static getMonthName() {
+        return DateHelper.monthDictionary()[DateHelper.getMonthNumber()];
     }
 
-    getYear() {
-        return this.date.getFullYear();
+    static getYear() {
+        return DataStore.getValue('year');
     }
 
-    getDay() {
-        return this.date.getDate();
+    static getDay() {
+        return DataStore.getValue('day');
+    }
+
+    static setDay(day) {
+        DataStore.setValue('day', day);
+    }
+
+    static setHour(hour) {
+        DataStore.setValue('hour', hour);
+    }
+
+    static setMinute(minutes) {
+        DataStore.setValue('minute', minutes);
+    }
+
+    static getHour() {
+        return DataStore.getValue('hour');
+    }
+
+    static getMinute() {
+        return DataStore.getValue('minute');
     }
 }

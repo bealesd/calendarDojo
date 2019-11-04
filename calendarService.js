@@ -3,20 +3,16 @@ import { DateHelper } from './dateHelper.js';
 import { CalendarHelper } from './calendarHelper.js';
 import { CalendarRepo } from './calendarRepo.js';
 import { DrawCalendar } from './drawCalendar.js';
+import { WebTimeHelper } from './webTimeHelper.js';
 
 export class CalendarService {
     constructor() {
         this.drawCalendarService = new DrawCalendar;
-        this.dateHelper = new DateHelper();
         this.calendarRepo = new CalendarRepo();
     }
 
-    post(title, time, id) {
-        return this.calendarRepo.postData(title, time, id, this.dateHelper.date, DataStore.getValue('day'));
-    }
-
-    postWithDate(title, time, id, day, month, year) {
-        return this.calendarRepo.postDataWithDate(title, time, id, day, month, year);
+    post(title, ticks, id) {
+        return this.calendarRepo.postData(title, id, ticks);
     }
 
     delete(id) {
@@ -33,13 +29,8 @@ export class CalendarService {
         }.bind(this));
     }
 
-    parseDateFromString(dateString) {
-        let date = new Date();
-        const year = dateString.split('/')[0];
-        const month = dateString.split('/')[1] - 1;
-        const day = dateString.split('/')[2];
-        date.setFullYear(year, month, day);
-        return date;
+    parseDateFromString(ticks) {
+        return new Date(Number.parseInt(ticks));
     }
 
     getCurrentMonthRecords(allCalendarRecords) {
@@ -47,7 +38,7 @@ export class CalendarService {
         let eventsPerDay = {};
         for (let i = 0; i < allCalendarRecords.length; i++) {
             const calendarEventDate = this.parseDateFromString(allCalendarRecords[i].date);
-            const eventIsCurrentMonth = calendarEventDate.getFullYear() === this.dateHelper.getYear() && calendarEventDate.getMonth() === this.dateHelper.getMonthNumber();
+            const eventIsCurrentMonth = calendarEventDate.getFullYear() === DateHelper.getYear() && calendarEventDate.getMonth() === DateHelper.getMonthNumber();
             if (eventIsCurrentMonth) {
                 if (eventsPerDay[calendarEventDate.getDate()] === undefined)
                     eventsPerDay[calendarEventDate.getDate()] = 1;
@@ -57,7 +48,7 @@ export class CalendarService {
                 const calendarEvent = {
                     'id': allCalendarRecords[i].id,
                     'title': allCalendarRecords[i].title,
-                    'time': allCalendarRecords[i].time,
+                    'time': WebTimeHelper.webTimeToString(calendarEventDate),
                     'day': calendarEventDate.getDate(),
                     'slot': eventsPerDay[calendarEventDate.getDate()]
                 };
@@ -68,7 +59,7 @@ export class CalendarService {
     }
 
     setCalendarEventsForCurrentMonth() {
-        var currentMonthCalendarRecords = this.getCurrentMonthRecords(DataStore.getValue('allCalendarRecords'));
+        let currentMonthCalendarRecords = this.getCurrentMonthRecords(DataStore.getValue('allCalendarRecords'));
         DataStore.setValue('currentMonthCalendarRecords', this.sortCalendarEvents(currentMonthCalendarRecords));
     }
 
@@ -83,18 +74,14 @@ export class CalendarService {
 
     drawCalendar() {
         this.drawCalendarService.clearCalendar();
-        this.drawCalendarService.daysInMonth = this.dateHelper.getDaysInMonth();
-        this.drawCalendarService.drawCalendarEvents(this.dateHelper.getDaysNames());
+        this.drawCalendarService.daysInMonth = DateHelper.getDaysInMonth();
+        this.drawCalendarService.drawCalendarEvents(DateHelper.getDaysNames());
 
-        if (this.dateHelper.getTodaysDate().day === this.dateHelper.getDay() &&
-            this.dateHelper.getTodaysDate().month === this.dateHelper.getMonthNumber() &&
-            this.dateHelper.getTodaysDate().year === this.dateHelper.getYear()) {
-            this.drawCalendarService.highlightCurrentDay(this.dateHelper.getTodaysDate().day);
-        }
+        if (DateHelper.getTodaysDate().month === DateHelper.getMonthNumber())
+            this.drawCalendarService.highlightCurrentDay(DateHelper.getTodaysDate().day);
 
         this.drawCalendarService.updateCalendarColors();
-        this.drawCalendarService.setMonthAndYearText(this.dateHelper.getMonthNumber(), this.dateHelper.getMonthName(), this.dateHelper.getYear());
+        this.drawCalendarService.setMonthAndYearText(DateHelper.getMonthNumber(), DateHelper.getMonthName(), DateHelper.getYear());
         this.drawCalendarService.setCalendarBorder();
     }
-
 }

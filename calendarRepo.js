@@ -1,6 +1,6 @@
 export class CalendarRepo {
     constructor() {
-        this.calendarRepoUrl = 'https://calservice.azurewebsites.net/';
+        this.calendarRepoUrl = 'http://localhost:1337/';
     }
 
     getData() {
@@ -8,30 +8,12 @@ export class CalendarRepo {
         .then((response)=>{return response.json();})
     }
 
-    postData(title, time, id = "", date, dayClicked) {
+    postData(title, id = "", ticks) {
         const jsonData = {
             title: `${title}`,
-            date: `${date.getFullYear()}/${date.getMonth() + 1}/${dayClicked}`,
-            time: `${time}`,
+            date: ticks,
             id: `${id}`
         };
-        return fetch(this.calendarRepoUrl, {
-            method: 'post',
-            headers: {
-                "Content-type": "application/json; charset=UTF-8"
-            },
-            body: JSON.stringify(jsonData)
-        });
-    }
-
-    postDataWithDate(title, time, id = "", day, month, year) {
-        const jsonData = {
-            title: `${title}`,
-            date: `${year}/${month}/${day}`,
-            time: `${time}`,
-            id: `${id}`
-        };
-
         return fetch(this.calendarRepoUrl, {
             method: 'post',
             headers: {
