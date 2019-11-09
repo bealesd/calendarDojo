@@ -1,6 +1,7 @@
 export class CalendarRepo {
     constructor() {
-        this.calendarRepoUrl = 'http://localhost:1337/';
+        // this.calendarRepoUrl = 'http://localhost:1337/';
+        this.calendarRepoUrl = 'https://calservice.azurewebsites.net/';
     }
 
     getData(year, month) {
