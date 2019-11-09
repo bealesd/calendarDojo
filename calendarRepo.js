@@ -3,19 +3,38 @@ export class CalendarRepo {
         this.calendarRepoUrl = 'http://localhost:1337/';
     }
 
-    getData() {
-        return fetch(this.calendarRepoUrl)
-        .then((response)=>{return response.json();})
+    getData(year, month) {
+        return fetch(this.calendarRepoUrl + `events?year=${year}&month=${month}`)
+        .then((response)=>{
+            return response.json();
+        })
+        .then((json)=>{
+            return JSON.parse(json);
+        })
     }
 
-    postData(title, id = "", ticks) {
+    postData(title, ticks) {
         const jsonData = {
-            title: `${title}`,
+            title: title,
             date: ticks,
-            id: `${id}`
         };
         return fetch(this.calendarRepoUrl, {
             method: 'post',
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            },
+            body: JSON.stringify(jsonData)
+        });
+    }
+
+    updateData(title, id, ticks) {
+        const jsonData = {
+            title: title,
+            date: ticks,
+            id: id
+        };
+        return fetch(this.calendarRepoUrl, {
+            method: 'put',
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
             },

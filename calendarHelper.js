@@ -33,4 +33,13 @@ export class CalendarHelper {
             }.bind(this), 66);
         }
     }
+
+    static sortCalendarEvents(calendarEventJson) {
+        let calendarEventsArray = [];
+        Object.keys(calendarEventJson).forEach(function (id) { calendarEventsArray.push(calendarEventJson[id]); });
+        calendarEventsArray.sort(CalendarHelper.compareByTime);
+        let soughtedCalendarEventJson = {};
+        calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event.id] = event; });
+        return soughtedCalendarEventJson;
+    }
 }

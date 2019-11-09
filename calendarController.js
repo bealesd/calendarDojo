@@ -2,6 +2,7 @@ import { CalendarEvents } from './calendarEvents.js';
 import { CalendarService } from './calendarService.js'
 import { MenuEvents } from './menuEvents.js';
 import { CalendarSubMenu } from './calendarSubMenu.js';
+import { DateHelper } from './dateHelper.js';
 
 export class CalendarController {
     constructor() {
@@ -17,7 +18,9 @@ export class CalendarController {
     }
 
     loadPage() {
-        this.calendarService.get()
+        const year = DateHelper.getTodaysDate().year;
+        const month = DateHelper.getTodaysDate().month;
+        this.calendarService.get(year, month)
             .then(() => {
                 this.loadCalendarPage();
                 new MenuEvents().setupMenuEvents();

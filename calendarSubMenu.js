@@ -27,13 +27,17 @@ export class CalendarSubMenu {
 
     calendarBackwards() {
         DateHelper.updateDate(false);
-        this.calendarService.setCalendarEventsForCurrentMonth();
-        this.calendarController.loadCalendarPage();
+        const year = DateHelper.getYear();
+        const month = DateHelper.getMonthNumber();
+        new CalendarService().get(year, month);
+        // this.calendarService.setCalendarEventsForCurrentMonth();
     }
 
     calendarForwards() {
         DateHelper.updateDate(true);
-        this.calendarService.setCalendarEventsForCurrentMonth();
-        this.calendarController.loadCalendarPage();
+        const year = DateHelper.getYear();
+        const month = DateHelper.getMonthNumber();
+        new CalendarService().get(year, month);
+        // this.calendarService.setCalendarEventsForCurrentMonth();
     }
 }
