@@ -99,9 +99,9 @@ export class CalendarEvents {
         if (this.isMultipleDaysSelected())
             this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         else {
-            new CalendarRepo().postData(title, id, date.getTime())
+            new CalendarRepo().postData(title, date.getTime())
                 .then(() => {
-                    calendarService.get(year, month)
+                    this.calendarController.calendarService.get(year, month)
                         .then(() => {
                             FormHelper.hideForm(this.calendarFormId);
                             new CalendarController().loadCalendarPage();
