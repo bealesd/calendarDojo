@@ -3,8 +3,6 @@ import { DateHelper } from './dateHelper.js';
 import { CalendarRepo } from './calendarRepo.js';
 import { DrawCalendar } from './drawCalendar.js';
 import { CalendarController } from './calendarController.js';
-import { MenuEvents } from './menuEvents.js';
-import { CalendarSubMenu } from './calendarSubMenu.js';
 
 export class CalendarService {
     constructor() {
@@ -30,8 +28,6 @@ export class CalendarService {
     setCalendarEventsForCurrentMonth(results) {
         DataStore.setValue('currentMonthCalendarRecords', results);
         new CalendarController().loadCalendarPage();
-        // new MenuEvents().setupMenuEvents();
-        // new CalendarSubMenu().calendarSubMenuCallback();
     }
 
     drawCalendar() {

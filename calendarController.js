@@ -3,6 +3,7 @@ import { CalendarService } from './calendarService.js'
 import { MenuEvents } from './menuEvents.js';
 import { CalendarSubMenu } from './calendarSubMenu.js';
 import { DateHelper } from './dateHelper.js';
+import { DataStore } from './dataStore.js';
 
 export class CalendarController {
     constructor() {
@@ -20,6 +21,10 @@ export class CalendarController {
     loadPage() {
         const year = DateHelper.getTodaysDate().year;
         const month = DateHelper.getTodaysDate().month;
+
+        DataStore.setValue('year', year);
+        DataStore.setValue('month', month);
+
         this.calendarService.get(year, month)
             .then(() => {
                 this.loadCalendarPage();

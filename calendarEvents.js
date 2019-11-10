@@ -21,7 +21,7 @@ export class CalendarEvents {
 
     onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords').filter((row)=>{return row.id===calendarEventTitle.id})[0]
+            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords').filter((row) => { return row.id === calendarEventTitle.id })[0]
             $(calendarEventTitle).off();
             CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
         });
@@ -99,14 +99,27 @@ export class CalendarEvents {
         if (this.isMultipleDaysSelected())
             this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         else {
-            new CalendarRepo().postData(title, date.getTime())
-                .then(() => {
-                    this.calendarController.calendarService.get(year, month)
-                        .then(() => {
-                            FormHelper.hideForm(this.calendarFormId);
-                            new CalendarController().loadCalendarPage();
-                        });
-                });
+            if (id !== undefined || id !== "" || id !== null) {
+                new CalendarRepo().updateData(title, id, date.getTime())
+                    .then(() => {
+                        this.calendarController.calendarService.get(year, month)
+                            .then(() => {
+                                FormHelper.hideForm(this.calendarFormId);
+                                new CalendarController().loadCalendarPage();
+                            });
+                    });
+            }
+            else {
+                new CalendarRepo().postData(title, date.getTime())
+                    .then(() => {
+                        this.calendarController.calendarService.get(year, month)
+                            .then(() => {
+                                FormHelper.hideForm(this.calendarFormId);
+                                new CalendarController().loadCalendarPage();
+                            });
+                    });
+            }
+
         }
         return false;
     }
