@@ -100,7 +100,7 @@ export class CalendarEvents {
             this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         else {
             if (id !== undefined || id !== "" || id !== null) {
-                new CalendarRepo().updateData(title, id, date.getTime())
+                CalendarRepo.updateData(title, id, date.getTime())
                     .then(() => {
                         this.calendarController.calendarService.get(year, month)
                             .then(() => {
@@ -110,7 +110,7 @@ export class CalendarEvents {
                     });
             }
             else {
-                new CalendarRepo().postData(title, date.getTime())
+                CalendarRepo.postData(title, date.getTime())
                     .then(() => {
                         this.calendarController.calendarService.get(year, month)
                             .then(() => {
