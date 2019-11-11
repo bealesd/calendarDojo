@@ -30,14 +30,11 @@ export class CalendarSubMenu {
         const year = DateHelper.getYear();
         const month = DateHelper.getMonthNumber();
         new CalendarService().get(year, month);
-        // this.calendarService.setCalendarEventsForCurrentMonth();
     }
 
     calendarForwards() {
         DateHelper.updateDate(true);
         const year = DateHelper.getYear();
         const month = DateHelper.getMonthNumber();
-        new CalendarService().get(year, month);
-        // this.calendarService.setCalendarEventsForCurrentMonth();
     }
 }

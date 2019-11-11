@@ -1,11 +1,12 @@
 export class CalendarRepo {
-    constructor() {
-        this.calendarRepoUrl = 'http://localhost:1337/';
-        // this.calendarRepoUrl = 'https://calservice.azurewebsites.net/';
+
+    static getBaseUrl(){
+        // return 'https://calservice.azurewebsites.net/'
+        return 'http://localhost:1337/'
     }
 
-    getData(year, month) {
-        return fetch(this.calendarRepoUrl + `events?year=${year}&month=${month}`)
+    static getData(year, month) {
+        return fetch(this.getBaseUrl() + `events?year=${year}&month=${month}`)
         .then((response)=>{
             return response.json();
         })
@@ -14,12 +15,12 @@ export class CalendarRepo {
         })
     }
 
-    postData(title, ticks) {
+    static postData(title, ticks) {
         const jsonData = {
             title: title,
             date: ticks,
         };
-        return fetch(this.calendarRepoUrl, {
+        return fetch(this.getBaseUrl(), {
             method: 'post',
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
@@ -28,13 +29,13 @@ export class CalendarRepo {
         });
     }
 
-    updateData(title, id, ticks) {
+    static updateData(title, id, ticks) {
         const jsonData = {
             title: title,
             date: ticks,
             id: id
         };
-        return fetch(this.calendarRepoUrl, {
+        return fetch(this.getBaseUrl(), {
             method: 'put',
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
@@ -43,8 +44,8 @@ export class CalendarRepo {
         });
     }
 
-    deleteData(id){
-        return fetch(`${this.calendarRepoUrl}?id=${id}`, {
+    static deleteData(id){
+        return fetch(`${this.getBaseUrl()}?id=${id}`, {
             method: 'delete',
         });
     }

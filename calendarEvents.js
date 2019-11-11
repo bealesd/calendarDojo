@@ -21,7 +21,7 @@ export class CalendarEvents {
 
     onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords').filter((row)=>{return row.id===calendarEventTitle.id})[0]
+            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords').filter((row) => { return row.id === calendarEventTitle.id })[0]
             $(calendarEventTitle).off();
             CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
         });
@@ -58,7 +58,7 @@ export class CalendarEvents {
     deleteCalendarEvent(self) {
         this.calendarController = self;
         const id = document.getElementById('eventId').value;
-        new CalendarRepo().deleteData(id)
+        CalendarRepo.deleteData(id)
             .then(() => {
                 return this.calendarController.calendarService.get(DateHelper.getYear(), DateHelper.getMonthNumber());
             })
@@ -99,7 +99,7 @@ export class CalendarEvents {
         if (this.isMultipleDaysSelected())
             this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         else {
-            new CalendarRepo().postData(title, date.getTime())
+            CalendarRepo.postData(title, date.getTime())
                 .then(() => {
                     this.calendarController.calendarService.get(year, month)
                         .then(() => {
@@ -121,7 +121,7 @@ export class CalendarEvents {
             const minutes = DateHelper.getMinute();
             let date = DateHelper.getDate(year, month, day, hours, minutes);
 
-            new CalendarRepo().postData(title, id, date.getTime())
+            CalendarRepo.postData(title, id, date.getTime())
                 .then(() => {
                     if (i === (dates.length - 1)) {
                         calendarController.calendarS
