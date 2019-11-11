@@ -99,14 +99,27 @@ export class CalendarEvents {
         if (this.isMultipleDaysSelected())
             this.createMultipleDaysCalendarEvent(this.calendarController, title, id);
         else {
-            CalendarRepo.postData(title, date.getTime())
-                .then(() => {
-                    this.calendarController.calendarService.get(year, month)
-                        .then(() => {
-                            FormHelper.hideForm(this.calendarFormId);
-                            new CalendarController().loadCalendarPage();
-                        });
-                });
+            if (id !== undefined || id !== "" || id !== null) {
+                new CalendarRepo().updateData(title, id, date.getTime())
+                    .then(() => {
+                        this.calendarController.calendarService.get(year, month)
+                            .then(() => {
+                                FormHelper.hideForm(this.calendarFormId);
+                                new CalendarController().loadCalendarPage();
+                            });
+                    });
+            }
+            else {
+                new CalendarRepo().postData(title, date.getTime())
+                    .then(() => {
+                        this.calendarController.calendarService.get(year, month)
+                            .then(() => {
+                                FormHelper.hideForm(this.calendarFormId);
+                                new CalendarController().loadCalendarPage();
+                            });
+                    });
+            }
+
         }
         return false;
     }
