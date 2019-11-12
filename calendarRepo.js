@@ -1,7 +1,7 @@
 export class CalendarRepo {
 
     static getBaseUrl(){
-        // return 'https://calservice.azurewebsites.net/'
+        return 'https://calservice.azurewebsites.net/'
         return 'http://localhost:1337/'
     }
 
