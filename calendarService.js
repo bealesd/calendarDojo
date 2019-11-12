@@ -2,7 +2,6 @@ import { DataStore } from './dataStore.js';
 import { DateHelper } from './dateHelper.js';
 import { CalendarRepo } from './calendarRepo.js';
 import { DrawCalendar } from './drawCalendar.js';
-import { CalendarController } from './calendarController.js';
 
 export class CalendarService {
 
@@ -16,11 +15,6 @@ export class CalendarService {
                 res();
             }.bind(this));
         }.bind(this));
-    }
-
-    setCalendarEventsForCurrentMonth(results) {
-        DataStore.setValue('currentMonthCalendarRecords', results);
-        // new CalendarController().loadCalendarPage();
     }
 
     drawCalendar() {
