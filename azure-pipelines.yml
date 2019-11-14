@@ -14,10 +14,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      # Write your PowerShell commands here.
-      
-      Write-Host "Hello World"
-      Write-Host "$(Agent.Name)"
+      Write-Host "My agent is: $(Agent.Name)"
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(build.sourcesDirectory)'
