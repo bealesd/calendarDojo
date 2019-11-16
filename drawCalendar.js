@@ -1,6 +1,6 @@
 import { DataStore } from './dataStore.js';
 import { WebTimeHelper } from './webTimeHelper.js';
-import { DateHelper } from './DateHelper.js';
+import { DateHelper } from './dateHelper.js';
 
 export class DrawCalendar {
     constructor() {
