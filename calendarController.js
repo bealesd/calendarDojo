@@ -2,7 +2,7 @@ import { CalendarEvents } from './calendarEvents.js';
 import { CalendarRepo } from './calendarRepo.js'
 import { DateHelper } from './dateHelper.js';
 import { DataStore } from './dataStore.js';
-import { DrawCalendar } from './DrawCalendar.js';
+import { DrawCalendar } from './drawCalendar.js';
 import { MenuEvents } from './menuEvents.js';
 import { CalendarSubMenu } from './calendarSubMenu.js';
 
