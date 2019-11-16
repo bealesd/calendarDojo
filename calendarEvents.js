@@ -58,9 +58,6 @@ export class CalendarEvents {
         const id = document.getElementById('eventId').value;
         CalendarRepo.deleteData(id)
             .then(() => {
-                return CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth());
-            })
-            .then(() => {
                 FormHelper.hideForm(this.calendarFormId());
                 cb();
             });
@@ -99,21 +96,15 @@ export class CalendarEvents {
             if (id === undefined || id === "" || id === null) {
                 CalendarRepo.postData(title, date.getTime())
                     .then(() => {
-                        CalendarRepo.getData(year, month)
-                            .then(() => {
-                                FormHelper.hideForm(this.calendarFormId());
-                                cb();
-                            });
+                        FormHelper.hideForm(this.calendarFormId());
+                        cb();
                     });
             }
             else {
                 CalendarRepo.updateData(title, id, date.getTime())
                     .then(() => {
-                        CalendarRepo.getData(year, month)
-                            .then(() => {
-                                FormHelper.hideForm(this.calendarFormId());
-                                cb();
-                            });
+                        FormHelper.hideForm(this.calendarFormId());
+                        cb();
                     });
             }
         }

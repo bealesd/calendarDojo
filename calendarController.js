@@ -21,8 +21,12 @@ export class CalendarController {
     }
 
     static loadCalendarPage() {
-        DrawCalendar.drawCalendar();
-        CalendarController.registerCalendarPageEventListeners();
+        CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth())
+            .then(() => {
+                DrawCalendar.drawCalendar();
+                CalendarController.registerCalendarPageEventListeners();
+            })
+
     }
 
     static registerCalendarPageEventListeners() {
@@ -34,7 +38,7 @@ export class CalendarController {
         CalendarEvents.onMultipleCalendarDaysEventClick(this.loadCalendarPage);
     }
 
-    static updateMonth(isNextMonth){
+    static updateMonth(isNextMonth) {
         DateHelper.updateDate(isNextMonth);
         const year = DateHelper.getYear();
         const month = DateHelper.getMonth();
