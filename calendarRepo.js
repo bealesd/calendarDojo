@@ -1,3 +1,5 @@
+import { DataStore } from './dataStore.js';
+
 export class CalendarRepo {
 
     static getBaseUrl(){
@@ -11,7 +13,13 @@ export class CalendarRepo {
             return response.json();
         })
         .then((json)=>{
-            return JSON.parse(json);
+            let results = JSON.parse(json)
+            results.forEach(element => {
+                element.day = new Date(element.date).getDate();
+            });
+            DataStore.setValue('currentMonthCalendarRecords', results);
+
+            return results;
         })
     }
 

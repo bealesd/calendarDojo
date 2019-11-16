@@ -1,11 +1,25 @@
 import { DataStore } from './dataStore.js';
 import { WebTimeHelper } from './webTimeHelper.js';
+import { DateHelper } from './DateHelper.js';
 
 export class DrawCalendar {
     constructor() {
         this.opacity = 0.3;
         this.colors = null;
         this.daysInMonth = null;
+    }
+
+    static drawCalendar() {
+        DrawCalendar.clearCalendar();
+        DrawCalendar.daysInMonth = DateHelper.getDaysInMonth();
+        DrawCalendar.drawCalendarEvents(DateHelper.getDaysNames());
+
+        if (DateHelper.getTodaysDate().month === DateHelper.getMonthNumber())
+            DrawCalendar.highlightCurrentDay(DateHelper.getTodaysDate().day);
+
+        DrawCalendar.updateCalendarColors();
+        DrawCalendar.setMonthAndYearText(DateHelper.getMonthNumber(), DateHelper.getMonthName(), DateHelper.getYear());
+        DrawCalendar.setCalendarBorder();
     }
 
     static setCalendarBorder() {
@@ -97,7 +111,7 @@ export class DrawCalendar {
 
     static clearCalendar() { document.getElementById('calendarContainer').innerHTML = ""; }
 
-    static createCalendarSubMenu() {//TODO: move to generic sub menu creator
+    static createCalendarSubMenu() {
         const refNode = document.getElementsByClassName('subMenu')[0];
         const height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
         const previousMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="nextMonth" onclick="calendarBackwards()"><span class="glyphicon glyphicon-menu-left"></span></a>`;
