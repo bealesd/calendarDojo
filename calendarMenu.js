@@ -1,19 +1,17 @@
-import { CalendarRepo } from './calendarRepo.js';
-import { DateHelper } from './dateHelper.js';
-import { CalendarController} from './calendarController.js';
-import { DrawCalendar} from './drawCalendar.js';
-import { CustomEvents} from './customEvents.js'; 
+import { CustomEvents } from './customEvents.js';
 
 export class CalendarMenu {
 
-    static calendarMenuCallback() {
+    static setCalendarMenu(changeMonthCallabck) {
         this.onMainMenuLinkHover('calendar');
         this.placeSubMenu(this.calendarSubMenuHtml());
-
-        document.getElementById('nextMonth').addEventListener('click', this.calendarForwards.bind(this));
-        document.getElementById('previousMonth').addEventListener('click', this.calendarBackwards.bind(this));
-
         this.onSubMenuLinkHover();
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            changeMonthCallabck(true);
+        });
+        document.getElementById('previousMonth').addEventListener('click', () => {
+            changeMonthCallabck(false);
+        });
     }
 
     static calendarSubMenuHtml() {
@@ -32,28 +30,6 @@ export class CalendarMenu {
             CustomEvents.onMouseOver(link, function () { link.style.backgroundColor = "blue"; });
             CustomEvents.onMouseOut(link, function () { link.style.backgroundColor = "#333"; });
         });
-    }
-
-    static calendarBackwards() {
-        //TODO simplify this to call update date only in controller?
-        DateHelper.updateDate(false);
-        const year = DateHelper.getYear();
-        const month = DateHelper.getMonth();
-        CalendarRepo.getData(year, month).then(() => {
-            DrawCalendar.drawCalendar();
-            CalendarController.registerCalendarPageEventListeners();
-        })
-    }
-
-    static calendarForwards() {
-        //TODO simplify this to call update date only in controller?
-        DateHelper.updateDate(true);
-        const year = DateHelper.getYear();
-        const month = DateHelper.getMonth();
-        CalendarRepo.getData(year, month).then(() => {
-            DrawCalendar.drawCalendar();
-            CalendarController.registerCalendarPageEventListeners();
-        })
     }
 
     static onMainMenuLinkHover(id) {

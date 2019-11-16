@@ -16,21 +16,31 @@ export class CalendarController {
             .then(() => {
                 DrawCalendar.drawCalendar();
                 this.registerCalendarPageEventListeners()
-                CalendarMenu.calendarMenuCallback();
+                CalendarMenu.setCalendarMenu(this.updateMonth);
             })
     }
 
     static loadCalendarPage() {
         DrawCalendar.drawCalendar();
-        this.registerCalendarPageEventListeners();
+        CalendarController.registerCalendarPageEventListeners();
     }
 
     static registerCalendarPageEventListeners() {
         CalendarEvents.onAddCalendarClick();
         CalendarEvents.onUpdateCalendarEventClick();
-        CalendarEvents.onDeleteCalendarEventClick();
+        CalendarEvents.onDeleteCalendarEventClick(this.loadCalendarPage);
         CalendarEvents.onCancelCalendarEventClick();
-        CalendarEvents.onCreateOrUpdateCalendarEventClick();
-        CalendarEvents.onMultipleCalendarDaysEventClick();
+        CalendarEvents.onCreateOrUpdateCalendarEventClick(this.loadCalendarPage);
+        CalendarEvents.onMultipleCalendarDaysEventClick(this.loadCalendarPage);
+    }
+
+    static updateMonth(isNextMonth){
+        DateHelper.updateDate(isNextMonth);
+        const year = DateHelper.getYear();
+        const month = DateHelper.getMonth();
+        CalendarRepo.getData(year, month).then(() => {
+            DrawCalendar.drawCalendar();
+            CalendarController.registerCalendarPageEventListeners();
+        })
     }
 }

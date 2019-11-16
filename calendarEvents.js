@@ -3,7 +3,6 @@ import { FormHelper } from './formHelper.js';
 import { CustomEvents } from './customEvents.js';
 import { DateHelper } from './dateHelper.js';
 import { WebTimeHelper } from './webTimeHelper.js';
-import { CalendarController } from './calendarController.js'
 import { CalendarRepo } from './calendarRepo.js'
 
 export class CalendarEvents {
@@ -27,17 +26,17 @@ export class CalendarEvents {
         });
     }
 
-    static onDeleteCalendarEventClick(self) {
+    static onDeleteCalendarEventClick(cb) {
         $('#eventDelete').off();
         CustomEvents.onClick($('#eventDelete'), () => {
-            this.deleteCalendarEvent(self);
+            this.deleteCalendarEvent(cb);
         });
     }
 
-    static onCreateOrUpdateCalendarEventClick(self) {
+    static onCreateOrUpdateCalendarEventClick(cb) {
         $('#eventAddOrUpdateButton').off();
         CustomEvents.onClick($('#eventAddOrUpdateButton'), () => {
-            this.createOrUpdateCalendarEvent(self);
+            this.createOrUpdateCalendarEvent(cb);
         });
     }
 
@@ -55,7 +54,7 @@ export class CalendarEvents {
         $('#dateRange').toggle();
     }
 
-    static deleteCalendarEvent() {
+    static deleteCalendarEvent(cb) {
         const id = document.getElementById('eventId').value;
         CalendarRepo.deleteData(id)
             .then(() => {
@@ -63,11 +62,11 @@ export class CalendarEvents {
             })
             .then(() => {
                 FormHelper.hideForm(this.calendarFormId());
-                CalendarController.loadCalendarPage();
+                cb();
             });
     }
 
-    static createOrUpdateCalendarEvent() {
+    static createOrUpdateCalendarEvent(cb) {
         const title = document.getElementById("eventTitle").value;
         const time = document.getElementById("eventTime").value;
         const id = document.getElementById("eventId").value;
@@ -95,7 +94,7 @@ export class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected())
-            this.createMultipleDaysCalendarEvent(title, id);
+            this.createMultipleDaysCalendarEvent(title, id, cb);
         else {
             if (id === undefined || id === "" || id === null) {
                 CalendarRepo.postData(title, date.getTime())
@@ -103,7 +102,7 @@ export class CalendarEvents {
                         CalendarRepo.getData(year, month)
                             .then(() => {
                                 FormHelper.hideForm(this.calendarFormId());
-                                CalendarController.loadCalendarPage();
+                                cb();
                             });
                     });
             }
@@ -113,7 +112,7 @@ export class CalendarEvents {
                         CalendarRepo.getData(year, month)
                             .then(() => {
                                 FormHelper.hideForm(this.calendarFormId());
-                                CalendarController.loadCalendarPage();
+                                cb();
                             });
                     });
             }
@@ -121,7 +120,7 @@ export class CalendarEvents {
         return false;
     }
 
-    static createMultipleDaysCalendarEvent(title, id) {
+    static createMultipleDaysCalendarEvent(title, id, cb) {
         const startDate = new Date(document.getElementById(`eventFrom`).value);
         const endDate = new Date(document.getElementById(`eventTo`).value);
         const dates = this.getDatesFromDateRange(startDate, endDate);
@@ -141,7 +140,7 @@ export class CalendarEvents {
                         CalendarRepo.getData(year, month)
                             .then(() => {
                                 FormHelper.hideForm(this.calendarFormId());
-                                CalendarController.loadCalendarPage();
+                                cb();
                             });
                     }
                 });
