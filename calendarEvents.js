@@ -59,7 +59,7 @@ export class CalendarEvents {
         const id = document.getElementById('eventId').value;
         CalendarRepo.deleteData(id)
             .then(() => {
-                return CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonthNumber());
+                return CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth());
             })
             .then(() => {
                 FormHelper.hideForm(this.calendarFormId());
@@ -77,7 +77,7 @@ export class CalendarEvents {
         DateHelper.setMinute(hoursAndMinutesArray[1]);
 
         const year = DateHelper.getYear();
-        const month = DateHelper.getMonthNumber();
+        const month = DateHelper.getMonth();
         const day = DateHelper.getDay();
         const hours = DateHelper.getHour();
         const minutes = DateHelper.getMinute();
@@ -122,7 +122,9 @@ export class CalendarEvents {
     }
 
     static createMultipleDaysCalendarEvent(title, id) {
-        const dates = this.getDates(new Date(document.getElementById(`eventFrom`).value), new Date(document.getElementById(`eventTo`).value));
+        const startDate = new Date(document.getElementById(`eventFrom`).value);
+        const endDate = new Date(document.getElementById(`eventTo`).value);
+        const dates = this.getDatesFromDateRange(startDate, endDate);
         for (let i = 0; i < dates.length; i++) {
             const day = dates[i].getDate();
             const month = dates[i].getMonth();
@@ -135,7 +137,7 @@ export class CalendarEvents {
                 .then(() => {
                     if (i === (dates.length - 1)) {
                         const year = DateHelper.getYear();
-                        const month = DateHelper.getMonthNumber();
+                        const month = DateHelper.getMonth();
                         CalendarRepo.getData(year, month)
                             .then(() => {
                                 FormHelper.hideForm(this.calendarFormId());
@@ -144,21 +146,6 @@ export class CalendarEvents {
                     }
                 });
         }
-    }
-
-    static getDates(startDate, stopDate) {
-        let dateArray = new Array();
-        let currentDate = startDate;
-        while (currentDate <= stopDate) {
-            dateArray.push(new Date(currentDate));
-            currentDate = this.addDays(currentDate);
-        }
-        return dateArray;
-    }
-
-    static addDays(date) {
-        date.setDate(date.getDate() + 1);
-        return date;
     }
 
     static isMultipleDaysSelected() {

@@ -2,37 +2,37 @@ import { DataStore } from './dataStore.js';
 
 export class DateHelper {
     static monthDictionary() {
-        let months = [];
-        months.push("January");
-        months.push("February");
-        months.push("March");
-        months.push("April");
-        months.push("May");
-        months.push("June");
-        months.push("July");
-        months.push("August");
-        months.push("September");
-        months.push("October");
-        months.push("November");
-        months.push("December");
+        let months = new Array(12);
+        months[0] = "January";
+        months[1] = "February";
+        months[2] = "March";
+        months[3] = "April";
+        months[4] = "May";
+        months[5] = "June";
+        months[6] = "July";
+        months[7] = "August";
+        months[8] = "September";
+        months[9] = "October";
+        months[10] = "November";
+        months[11] = "December";
         return months;
     }
 
     static daysDictionary() {
-        let days = [];
-        days.push("Sunday");
-        days.push("Monday");
-        days.push("Tuesday");
-        days.push("Wednesday");
-        days.push("Thursday");
-        days.push("Friday");
-        days.push("Saturday");
+        let days = new Array(7);
+        days[0] = "Sunday";
+        days[1] = "Monday";
+        days[2] = "Tuesday";
+        days[3] = "Wednesday";
+        days[4] = "Thursday";
+        days[5] = "Friday";
+        days[6] = "Saturday";
         return days;
     }
 
     static updateDate(isNextMonth) {
-        let month = DataStore.getValue('month');
-        let year = DataStore.getValue('year');
+        let month = this.getMonth();
+        let year = this.getYear();
         if (isNextMonth) {
             if (month === 11) {
                 month = 0;
@@ -47,8 +47,8 @@ export class DateHelper {
             }
             else month -= 1;
         }
-        DataStore.setValue('month', month);
-        DataStore.setValue('year', year);
+        this.setMonth(month);
+        this.setYear(year);
     }
 
     static getDate(year, month, day, hours, minutes) {
@@ -62,11 +62,11 @@ export class DateHelper {
     }
 
     static getDaysNames() {
-        const daysInMonth = DateHelper.getDaysInMonth();
+        const daysInMonth = this.getDaysInMonth();
         let daysNames = new Array(daysInMonth);
         for (let i = 1; i <= daysInMonth; i++) {
-            const day = new Date(DateHelper.getYear(), DateHelper.getMonthNumber(), i).getDay();
-            daysNames[i] = DateHelper.daysDictionary()[day % 7];
+            const day = new Date(this.getYear(), this.getMonth(), i).getDay();
+            daysNames[i] = this.daysDictionary()[day % 7];
         }
         return daysNames;
     }
@@ -80,20 +80,36 @@ export class DateHelper {
         return new Date(DataStore.getValue('year'), DataStore.getValue('month') + 1, 0).getDate();
     }
 
-    static getMonthNumber() {
-        return DataStore.getValue('month');
-    }
-
-    static getMonthName() {
-        return DateHelper.monthDictionary()[DateHelper.getMonthNumber()];
-    }
-
     static getYear() {
         return DataStore.getValue('year');
     }
 
+    static getMonth() {
+        return DataStore.getValue('month');
+    }
+
+    static getMonthName() {
+        return DateHelper.monthDictionary()[this.getMonth()];
+    }
+
     static getDay() {
         return DataStore.getValue('day');
+    }
+
+    static getHour() {
+        return DataStore.getValue('hour');
+    }
+
+    static getMinute() {
+        return DataStore.getValue('minute');
+    }
+
+    static setYear(year) {
+        DataStore.setValue('year', year);
+    }
+
+    static setMonth(month) {
+        DataStore.setValue('month', month);
     }
 
     static setDay(day) {
@@ -108,11 +124,18 @@ export class DateHelper {
         DataStore.setValue('minute', minutes);
     }
 
-    static getHour() {
-        return DataStore.getValue('hour');
+    static getDatesFromDateRange(startDate, endDate) {
+        let dateArray = new Array();
+        let currentDate = startDate;
+        while (currentDate <= endDate) {
+            dateArray.push(new Date(currentDate));
+            currentDate = this.addDays(currentDate, 1);
+        }
+        return dateArray;
     }
 
-    static getMinute() {
-        return DataStore.getValue('minute');
+    static addDays(date, days) {
+        date.setDate(date.getDate() + days);
+        return date;
     }
 }

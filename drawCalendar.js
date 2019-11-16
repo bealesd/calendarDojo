@@ -14,11 +14,11 @@ export class DrawCalendar {
         DrawCalendar.daysInMonth = DateHelper.getDaysInMonth();
         DrawCalendar.drawCalendarEvents(DateHelper.getDaysNames());
 
-        if (DateHelper.getTodaysDate().month === DateHelper.getMonthNumber())
+        if (DateHelper.getTodaysDate().month === DateHelper.getMonth())
             DrawCalendar.highlightCurrentDay(DateHelper.getTodaysDate().day);
 
         DrawCalendar.updateCalendarColors();
-        DrawCalendar.setMonthAndYearText(DateHelper.getMonthNumber(), DateHelper.getMonthName(), DateHelper.getYear());
+        DrawCalendar.setMonthAndYearText(DateHelper.getMonth(), DateHelper.getMonthName(), DateHelper.getYear());
         DrawCalendar.setCalendarBorder();
     }
 

@@ -10,14 +10,13 @@ self.addEventListener('install', event => {
                     './calendarEvents.js',
                     './calendarHelper.js',
                     './calendarRepo.js',
-                    './calendarSubMenu.js',
+                    './calendarMenu.js',
                     './customEvents.js',
                     './style.css',
                     './dataStore.js',
                     './dateHelper.js',
                     './drawCalendar.js',
                     './formHelper.js',
-                    './menuEvents.js',
                     './webTimeHelper.js',
                 ])
                     .then(() =>

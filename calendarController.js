@@ -3,22 +3,21 @@ import { CalendarRepo } from './calendarRepo.js'
 import { DateHelper } from './dateHelper.js';
 import { DataStore } from './dataStore.js';
 import { DrawCalendar } from './drawCalendar.js';
-import { MenuEvents } from './menuEvents.js';
-import { CalendarSubMenu } from './calendarSubMenu.js';
+import { CalendarMenu } from './calendarMenu.js';
 
 export class CalendarController {
-    static loadPage() {
+    static loadCalendar() {
         const year = DateHelper.getTodaysDate().year;
         const month = DateHelper.getTodaysDate().month;
-
         DataStore.setValue('year', year);
         DataStore.setValue('month', month);
 
-        CalendarRepo.getData(year, month).then(() => {
-            this.loadCalendarPage();
-            MenuEvents.setupMenuEvents();
-            CalendarSubMenu.calendarSubMenuCallback();
-        })
+        CalendarRepo.getData(year, month)
+            .then(() => {
+                DrawCalendar.drawCalendar();
+                this.registerCalendarPageEventListeners()
+                CalendarMenu.calendarMenuCallback();
+            })
     }
 
     static loadCalendarPage() {
@@ -29,9 +28,9 @@ export class CalendarController {
     static registerCalendarPageEventListeners() {
         CalendarEvents.onAddCalendarClick();
         CalendarEvents.onUpdateCalendarEventClick();
-        CalendarEvents.onDeleteCalendarEventClick(this);
+        CalendarEvents.onDeleteCalendarEventClick();
         CalendarEvents.onCancelCalendarEventClick();
-        CalendarEvents.onCreateOrUpdateCalendarEventClick(this);
+        CalendarEvents.onCreateOrUpdateCalendarEventClick();
         CalendarEvents.onMultipleCalendarDaysEventClick();
     }
 }
