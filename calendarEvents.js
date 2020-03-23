@@ -13,41 +13,47 @@ export class CalendarEvents {
     static onAddCalendarClick() {
         document.querySelectorAll('.calendar > div > .block > .add').forEach((block) => {
             const day = block.parentNode.id;
-            $(block).off();
-            CustomEvents.onClick($(block), this.openAddCalendarForm.bind(this), day);
+            new CustomEvents().overwriteEvents('mouseup', block, () => {
+                this.openAddCalendarForm(day);
+            });
         });
     }
 
     static onUpdateCalendarEventClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            const calendarEvent = DataStore.getValue('currentMonthCalendarRecords').filter((row) => { return row.id === calendarEventTitle.id })[0]
-            $(calendarEventTitle).off();
-            CustomEvents.onClick($(calendarEventTitle), this.openUpdateCalendarForm.bind(this), calendarEvent);
+            new CustomEvents().overwriteEvents('mouseup', calendarEventTitle, () => {
+                this.openUpdateCalendarForm();
+            });
         });
     }
 
     static onDeleteCalendarEventClick(cb) {
-        $('#eventDelete').off();
-        CustomEvents.onClick($('#eventDelete'), () => {
+        const element = document.querySelector('#eventDelete');
+        new CustomEvents().overwriteEvents('mouseup', element, () => {
             this.deleteCalendarEvent(cb);
         });
+
     }
 
     static onCreateOrUpdateCalendarEventClick(cb) {
-        $('#eventAddOrUpdateButton').off();
-        CustomEvents.onClick($('#eventAddOrUpdateButton'), () => {
+        const element = document.querySelector('#eventAddOrUpdateButton');
+        new CustomEvents().overwriteEvents('mouseup', element, () => {
             this.createOrUpdateCalendarEvent(cb);
         });
     }
 
     static onCancelCalendarEventClick() {
-        $('#eventClose').off();
-        CustomEvents.onClick($('#eventClose'), () => { FormHelper.hideForm(this.calendarFormId()); });
+        const element = document.querySelector('#eventClose');
+        new CustomEvents().overwriteEvents('mouseup', element, () => {
+            FormHelper.hideForm(this.calendarFormId());
+        });
     }
 
     static onMultipleCalendarDaysEventClick() {
-        $('#eventMultipleDays').off();
-        CustomEvents.onClick($('#eventMultipleDays'), this.multipleCalendarDaysEventClick.bind(this));
+        const element = document.querySelector('#eventMultipleDays');
+        new CustomEvents().overwriteEvents('mouseup', element, () => {
+            this.multipleCalendarDaysEventClick();
+        });
     }
 
     static multipleCalendarDaysEventClick() {
@@ -64,10 +70,10 @@ export class CalendarEvents {
     }
 
     static createOrUpdateCalendarEvent(cb) {
-        const title = document.getElementById("eventTitle").value;
-        const time = document.getElementById("eventTime").value;
         const id = document.getElementById("eventId").value;
+        const title = document.getElementById("eventTitle").value;
 
+        const time = document.getElementById("eventTime").value;
         const hoursAndMinutesArray = WebTimeHelper.webTimeToArray(time);
         DateHelper.setHour(hoursAndMinutesArray[0]);
         DateHelper.setMinute(hoursAndMinutesArray[1]);
@@ -75,9 +81,18 @@ export class CalendarEvents {
         const year = DateHelper.getYear();
         const month = DateHelper.getMonth();
         const day = DateHelper.getDay();
-        const hours = DateHelper.getHour();
-        const minutes = DateHelper.getMinute();
-        let date = DateHelper.getDate(year, month, day, hours, minutes);
+        const hour = DateHelper.getHour();
+        const minute = DateHelper.getMinute();
+
+        let json = {
+            'guid': id,
+            'title': `${title}`,
+            'year': `${year}`,
+            'month': `${month}`,
+            'day': `${day}`,
+            'hour': `${hour}`,
+            'minute': `${minute}`
+        }
 
         if (title.trim().length === 0) {
             alert('form incomplete');
@@ -94,14 +109,14 @@ export class CalendarEvents {
             this.createMultipleDaysCalendarEvent(title, id, cb);
         else {
             if (id === undefined || id === "" || id === null) {
-                CalendarRepo.postData(title, date.getTime())
+                CalendarRepo.postData(json)
                     .then(() => {
                         FormHelper.hideForm(this.calendarFormId());
                         cb();
                     });
             }
             else {
-                CalendarRepo.updateData(title, id, date.getTime())
+                CalendarRepo.updateData(json)
                     .then(() => {
                         FormHelper.hideForm(this.calendarFormId());
                         cb();
@@ -142,18 +157,32 @@ export class CalendarEvents {
         return $('#eventMultipleDays')[0].checked;
     }
 
-    static openUpdateCalendarForm(calendarEvent) {
+    static openUpdateCalendarForm() {
+        const id = event.currentTarget.id;
+        const calendarRecord = this.getCalendarRecordById(id);
+
         $('#multipleDays').hide();
         $('#dateRange').hide();
 
-        DateHelper.setDay(calendarEvent.day);
+        let t = new Date();
+        t.setFullYear(calendarRecord['year']);
+        t.setMonth(calendarRecord['month'])
+        t.setDate(calendarRecord['day']);
+        t.setHours(calendarRecord['hour']);
+        t.setMinutes(calendarRecord['minute']);
+
+        DateHelper.setDay(calendarRecord.day);
         this.setCalendarFormType('Update');
-        this.setCalendarFormValues(`Update event on ${calendarEvent.day}`,
-            calendarEvent.title,
-            WebTimeHelper.webTimeToString(new Date(calendarEvent.date)),
-            calendarEvent.id);
+        this.setCalendarFormValues(`Update event on ${calendarRecord.day}`,
+            calendarRecord.title,
+            WebTimeHelper.webTimeToString(t),
+            calendarRecord.id);
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId());
+    }
+
+    static getCalendarRecordById(id) {
+        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => calendarRecord.id === event.currentTarget.id);
     }
 
     static openAddCalendarForm(day) {

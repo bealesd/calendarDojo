@@ -5,12 +5,16 @@
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
     <title>Calendar</title>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="./bootstrap.min.css">
+
     <link rel="shortcut icon" href="#" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+    <script src="./jquery.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="./style.css" />
+
 </head>
 
 <body>
@@ -32,13 +36,14 @@
     </div>
 
     <form id="addOrEditCalendarEvents"
-          style="background-color:#FFFFFF; padding:30px; position: absolute; opacity: 50; z-index: 950; display: none;">
+        style="background-color:#FFFFFF; padding:30px; position: absolute; opacity: 50; z-index: 950; display: none;">
         <h3 id="formTitle">Title</h3>
         <div hidden id="eventId"></div>
         <input id="eventTitle" type="text" name="title" placeholder="title"><br>
         <input id="eventTime" type="time" name="when" step='900'><br>
 
-        <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox" name="checkbox"><br></span>
+        <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox"
+                name="checkbox"><br></span>
         <div id="dateRange">
             <input id="eventFrom" type="date" name="date"><br>
             <input id="eventTo" type="date" name="date"><br>
@@ -50,13 +55,13 @@
     </form>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./serviceWorker.js', { scope: './' }).then(function (registration) {
-                console.log('Service worker registration succeeded:', registration);
-            }, function (error) {
-                console.log('Service worker registration failed:', error);
-            });
-        }
+        // if ('serviceWorker' in navigator) {
+        //     navigator.serviceWorker.register('./serviceWorker.js', { scope: './' }).then(function (registration) {
+        //         console.log('Service worker registration succeeded:', registration);
+        //     }, function (error) {
+        //         console.log('Service worker registration failed:', error);
+        //     });
+        // }
 
         $("#neonToggle").on("click", function () {
             if (document.getElementsByClassName('heading')[0].classList.contains('headingAnimation'))
@@ -67,10 +72,13 @@
 
     </script>
 
-<script type="module">
-    import { CalendarController } from './calendarController.js';
-    CalendarController.loadCalendar();
-</script>
+    <script type="module">
+        import { CalendarController } from './calendarController.js';
+        import { TypeCheck } from './typeCheck.js';
+        new TypeCheck();
+
+        CalendarController.loadCalendar();
+    </script>
 
 </body>
 

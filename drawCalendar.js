@@ -83,7 +83,15 @@ export class DrawCalendar {
     }
 
     static createCalendarDayRow(calendarEvent) {
-        const time = WebTimeHelper.webTimeToString(new Date(calendarEvent.date));
+        let t = new Date();
+        t.setFullYear(calendarEvent['year']);
+        t.setMonth(calendarEvent['month'])
+        t.setDate(calendarEvent['day']);
+        t.setHours(calendarEvent['hour']);
+        t.setMinutes(calendarEvent['minute']);
+
+        const time = WebTimeHelper.webTimeToString(t);
+        // const time = WebTimeHelper.webTimeToString(new Date(calendarEvent.date));
         return `<tr><td class="calendarEventTitle" id='${calendarEvent.id}'>
                 ${time}&nbsp<em>${calendarEvent.title}</em>
                 </td></tr>`;
