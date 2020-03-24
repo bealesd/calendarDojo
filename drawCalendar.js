@@ -42,10 +42,9 @@ export class DrawCalendar {
     static drawCalendarEvents(dayNames) {
         const refNode = document.getElementById('calendarContainer');
         const style = `style='height:${this.calculateBlockHeight()}px;'`;
-        let node = '';
 
         for (let day = 1; day <= this.daysInMonth; day++) {
-            node = `<div id='${day}' class='block' ${style}><p class='add'>${day} - ${dayNames[day]}</p><table><tbody></tbody></table></div>`;
+            const node = `<div id='${day}' class='block' ${style}><p class='add'>${day} - ${dayNames[day]}</p><table><tbody></tbody></table></div>`;
             refNode.innerHTML += node;
         }
 
@@ -83,15 +82,14 @@ export class DrawCalendar {
     }
 
     static createCalendarDayRow(calendarEvent) {
-        let t = new Date();
-        t.setFullYear(calendarEvent['year']);
-        t.setMonth(calendarEvent['month'])
-        t.setDate(calendarEvent['day']);
-        t.setHours(calendarEvent['hour']);
-        t.setMinutes(calendarEvent['minute']);
-
-        const time = WebTimeHelper.webTimeToString(t);
-        // const time = WebTimeHelper.webTimeToString(new Date(calendarEvent.date));
+        let date = new Date();
+        date.setFullYear(calendarEvent['year']);
+        date.setMonth(calendarEvent['month'])
+        date.setDate(calendarEvent['day']);
+        date.setHours(calendarEvent['hour']);
+        date.setMinutes(calendarEvent['minute']);
+        // TODO - stop using date
+        const time = WebTimeHelper.webTimeToString(date);
         return `<tr><td class="calendarEventTitle" id='${calendarEvent.id}'>
                 ${time}&nbsp<em>${calendarEvent.title}</em>
                 </td></tr>`;
@@ -122,8 +120,8 @@ export class DrawCalendar {
     static createCalendarSubMenu() {
         const refNode = document.getElementsByClassName('subMenu')[0];
         const height = window.getComputedStyle(document.querySelectorAll('.navbar > a')[0]).height;
-        const previousMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="nextMonth" onclick="calendarBackwards()"><span class="glyphicon glyphicon-menu-left"></span></a>`;
-        const nextMonthHtml = `<a style='height:${height}'  class="navBar subMenuElement" id="previousMonth" onclick="calendarForwards()"><span class="glyphicon glyphicon-menu-right"></span></a>`;
+        const previousMonthHtml = `<a style='height:${height}' class="navBar subMenuElement" id="nextMonth" onclick="calendarBackwards()"><span class="glyphicon glyphicon-menu-left"></span></a>`;
+        const nextMonthHtml = `<a style='height:${height}' class="navBar subMenuElement" id="previousMonth" onclick="calendarForwards()"><span class="glyphicon glyphicon-menu-right"></span></a>`;
         refNode.innerHTML = `${previousMonthHtml}${nextMonthHtml}`;
     }
 }

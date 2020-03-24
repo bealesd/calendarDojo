@@ -6,45 +6,41 @@ import { DrawCalendar } from './drawCalendar.js';
 import { CalendarMenu } from './calendarMenu.js';
 
 export class CalendarController {
-    static loadCalendar() {
+    static async main() {
+        this.setCurrentMonth();
+        await this.loadCalendarPage();
+        CalendarMenu.setCalendarMenu(this.updateMonth);
+    }
+
+    static setCurrentMonth() {
         const year = DateHelper.getTodaysDate().year;
         const month = DateHelper.getTodaysDate().month;
         DataStore.setValue('year', year);
         DataStore.setValue('month', month);
-
-        CalendarRepo.getData(year, month)
-            .then(() => {
-                DrawCalendar.drawCalendar();
-                this.registerCalendarPageEventListeners()
-                CalendarMenu.setCalendarMenu(this.updateMonth);
-            })
     }
 
-    static loadCalendarPage() {
-        CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth())
-            .then(() => {
-                DrawCalendar.drawCalendar();
-                CalendarController.registerCalendarPageEventListeners();
-            })
+    static async loadCalendarPage() {
+        await CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth());
+        DrawCalendar.drawCalendar();
+        CalendarController.registerCalendarPageEventListeners();
+    }
 
+    static async refreshCalendarPage() {
+        DrawCalendar.drawCalendar();
+        CalendarController.registerCalendarPageEventListeners();
     }
 
     static registerCalendarPageEventListeners() {
         CalendarEvents.onAddCalendarClick();
         CalendarEvents.onUpdateCalendarEventClick();
-        CalendarEvents.onDeleteCalendarEventClick(this.loadCalendarPage);
+        CalendarEvents.onDeleteCalendarEventClick(this.refreshCalendarPage);
         CalendarEvents.onCancelCalendarEventClick();
         CalendarEvents.onCreateOrUpdateCalendarEventClick(this.loadCalendarPage);
         CalendarEvents.onMultipleCalendarDaysEventClick(this.loadCalendarPage);
     }
 
-    static updateMonth(isNextMonth) {
+    static async updateMonth(isNextMonth) {
         DateHelper.updateDate(isNextMonth);
-        const year = DateHelper.getYear();
-        const month = DateHelper.getMonth();
-        CalendarRepo.getData(year, month).then(() => {
-            DrawCalendar.drawCalendar();
-            CalendarController.registerCalendarPageEventListeners();
-        })
+        await CalendarController.loadCalendarPage();
     }
 }

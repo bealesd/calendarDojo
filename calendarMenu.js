@@ -6,10 +6,12 @@ export class CalendarMenu {
         this.onMainMenuLinkHover('calendar');
         this.placeSubMenu(this.calendarSubMenuHtml());
         this.onSubMenuLinkHover();
-        document.getElementById('nextMonth').addEventListener('click', () => {
+
+        new CustomEvents().overwriteEvents('click', document.querySelector('#nextMonth'), () => {
             changeMonthCallabck(true);
         });
-        document.getElementById('previousMonth').addEventListener('click', () => {
+
+        new CustomEvents().overwriteEvents('click', document.querySelector('#previousMonth'), () => {
             changeMonthCallabck(false);
         });
     }
@@ -22,7 +24,7 @@ export class CalendarMenu {
     }
 
     static placeSubMenu(subMenuHtml) {
-        document.getElementsByClassName('subMenu')[0].innerHTML = subMenuHtml;
+        document.querySelector('.subMenu').innerHTML = subMenuHtml;
     }
 
     static onSubMenuLinkHover() {

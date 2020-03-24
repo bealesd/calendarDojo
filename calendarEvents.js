@@ -3,7 +3,7 @@ import { FormHelper } from './formHelper.js';
 import { CustomEvents } from './customEvents.js';
 import { DateHelper } from './dateHelper.js';
 import { WebTimeHelper } from './webTimeHelper.js';
-import { CalendarRepo } from './calendarRepo.js'
+import { CalendarRepo } from './calendarRepo.js';
 
 export class CalendarEvents {
     static calendarFormId() {
@@ -32,7 +32,6 @@ export class CalendarEvents {
         new CustomEvents().overwriteEvents('mouseup', element, () => {
             this.deleteCalendarEvent(cb);
         });
-
     }
 
     static onCreateOrUpdateCalendarEventClick(cb) {
@@ -60,16 +59,22 @@ export class CalendarEvents {
         $('#dateRange').toggle();
     }
 
-    static deleteCalendarEvent(cb) {
+    static async deleteCalendarEvent(cb) {
         const id = document.getElementById('eventId').value;
-        CalendarRepo.deleteData(id)
-            .then(() => {
-                FormHelper.hideForm(this.calendarFormId());
-                cb();
-            });
+        await CalendarRepo.deleteData(id);
+
+        FormHelper.hideForm(this.calendarFormId());
+
+        let records = DataStore.getValue('currentMonthCalendarRecords');
+        const filteredRecords = records.filter((record) => {
+            return record['id'] !== id;
+        });
+        DataStore.setValue('currentMonthCalendarRecords', filteredRecords);
+
+        cb();
     }
 
-    static createOrUpdateCalendarEvent(cb) {
+    static async createOrUpdateCalendarEvent(cb) {
         const id = document.getElementById("eventId").value;
         const title = document.getElementById("eventTitle").value;
 
@@ -106,51 +111,49 @@ export class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected())
-            this.createMultipleDaysCalendarEvent(title, id, cb);
+            await this.createMultipleDaysCalendarEvent(title, cb);
         else {
             if (id === undefined || id === "" || id === null) {
-                CalendarRepo.postData(json)
-                    .then(() => {
-                        FormHelper.hideForm(this.calendarFormId());
-                        cb();
-                    });
+                await CalendarRepo.postData(json);
+                FormHelper.hideForm(this.calendarFormId());
+                cb();
             }
             else {
-                CalendarRepo.updateData(json)
-                    .then(() => {
-                        FormHelper.hideForm(this.calendarFormId());
-                        cb();
-                    });
+                await CalendarRepo.updateData(json);
+                FormHelper.hideForm(this.calendarFormId());
+                cb();
             }
         }
         return false;
     }
 
-    static createMultipleDaysCalendarEvent(title, id, cb) {
+    static async createMultipleDaysCalendarEvent(title, cb) {
         const startDate = new Date(document.getElementById(`eventFrom`).value);
         const endDate = new Date(document.getElementById(`eventTo`).value);
-        const dates = this.getDatesFromDateRange(startDate, endDate);
+        const dates = DateHelper.getDatesFromDateRange(startDate, endDate);
         for (let i = 0; i < dates.length; i++) {
             const day = dates[i].getDate();
             const month = dates[i].getMonth();
             const year = dates[i].getFullYear();
-            const hours = DateHelper.getHour();
-            const minutes = DateHelper.getMinute();
-            let date = DateHelper.getDate(year, month, day, hours, minutes);
+            const hour = DateHelper.getHour();
+            const minute = DateHelper.getMinute();
 
-            CalendarRepo.postData(title, id, date.getTime())
-                .then(() => {
-                    if (i === (dates.length - 1)) {
-                        const year = DateHelper.getYear();
-                        const month = DateHelper.getMonth();
-                        CalendarRepo.getData(year, month)
-                            .then(() => {
-                                FormHelper.hideForm(this.calendarFormId());
-                                cb();
-                            });
-                    }
-                });
+            let json = {
+                'title': `${title}`,
+                'year': `${year}`,
+                'month': `${month}`,
+                'day': `${day}`,
+                'hour': `${hour}`,
+                'minute': `${minute}`
+            };
+            await CalendarRepo.postData(json);
         }
+
+        const year = DateHelper.getYear();
+        const month = DateHelper.getMonth();
+        await CalendarRepo.getData(year, month);
+        FormHelper.hideForm(this.calendarFormId());
+        cb();
     }
 
     static isMultipleDaysSelected() {
@@ -164,18 +167,18 @@ export class CalendarEvents {
         $('#multipleDays').hide();
         $('#dateRange').hide();
 
-        let t = new Date();
-        t.setFullYear(calendarRecord['year']);
-        t.setMonth(calendarRecord['month'])
-        t.setDate(calendarRecord['day']);
-        t.setHours(calendarRecord['hour']);
-        t.setMinutes(calendarRecord['minute']);
+        let date = new Date();
+        date.setFullYear(calendarRecord['year']);
+        date.setMonth(calendarRecord['month'])
+        date.setDate(calendarRecord['day']);
+        date.setHours(calendarRecord['hour']);
+        date.setMinutes(calendarRecord['minute']);
 
         DateHelper.setDay(calendarRecord.day);
         this.setCalendarFormType('Update');
         this.setCalendarFormValues(`Update event on ${calendarRecord.day}`,
             calendarRecord.title,
-            WebTimeHelper.webTimeToString(t),
+            WebTimeHelper.webTimeToString(date),
             calendarRecord.id);
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId());
