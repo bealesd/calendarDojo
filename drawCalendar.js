@@ -90,7 +90,7 @@ export class DrawCalendar {
         date.setMinutes(calendarEvent['minute']);
         // TODO - stop using date
         const time = WebTimeHelper.webTimeToString(date);
-        return `<tr><td class="calendarEventTitle" id='${calendarEvent.id}'>
+        return `<tr><td class="calendarEventTitle" id='${calendarEvent.guid}'>
                 ${time}&nbsp<em>${calendarEvent.title}</em>
                 </td></tr>`;
     }

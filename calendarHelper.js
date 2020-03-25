@@ -36,10 +36,10 @@ export class CalendarHelper {
 
     static sortCalendarEvents(calendarEventJson) {
         let calendarEventsArray = [];
-        Object.keys(calendarEventJson).forEach(function (id) { calendarEventsArray.push(calendarEventJson[id]); });
+        Object.keys(calendarEventJson).forEach(function (guid) { calendarEventsArray.push(calendarEventJson[guid]); });
         calendarEventsArray.sort(CalendarHelper.compareByTime);
         let soughtedCalendarEventJson = {};
-        calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event.id] = event; });
+        calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event[guid]] = event; });
         return soughtedCalendarEventJson;
     }
 }

@@ -27,17 +27,17 @@ export class CalendarEvents {
         });
     }
 
-    static onDeleteCalendarEventClick(cb) {
+    static onDeleteCalendarEventClick(refreshCallback) {
         const element = document.querySelector('#eventDelete');
         new CustomEvents().overwriteEvents('mouseup', element, () => {
-            this.deleteCalendarEvent(cb);
+            this.deleteCalendarEvent(refreshCallback);
         });
     }
 
-    static onCreateOrUpdateCalendarEventClick(cb) {
+    static onCreateOrUpdateCalendarEventClick(refreshCallback) {
         const element = document.querySelector('#eventAddOrUpdateButton');
         new CustomEvents().overwriteEvents('mouseup', element, () => {
-            this.createOrUpdateCalendarEvent(cb);
+            this.createOrUpdateCalendarEvent(refreshCallback);
         });
     }
 
@@ -59,23 +59,23 @@ export class CalendarEvents {
         $('#dateRange').toggle();
     }
 
-    static async deleteCalendarEvent(cb) {
-        const id = document.getElementById('eventId').value;
-        await CalendarRepo.deleteData(id);
+    static async deleteCalendarEvent(refreshCallback) {
+        const guid = document.getElementById('eventId').value;
+        await CalendarRepo.deleteData(guid);
 
         FormHelper.hideForm(this.calendarFormId());
 
         let records = DataStore.getValue('currentMonthCalendarRecords');
         const filteredRecords = records.filter((record) => {
-            return record['id'] !== id;
+            return record['guid'] !== guid;
         });
         DataStore.setValue('currentMonthCalendarRecords', filteredRecords);
 
-        cb();
+        refreshCallback();
     }
 
-    static async createOrUpdateCalendarEvent(cb) {
-        const id = document.getElementById("eventId").value;
+    static async createOrUpdateCalendarEvent(refreshCallback) {
+        const guid = document.getElementById("eventId").value;
         const title = document.getElementById("eventTitle").value;
 
         const time = document.getElementById("eventTime").value;
@@ -90,7 +90,7 @@ export class CalendarEvents {
         const minute = DateHelper.getMinute();
 
         let json = {
-            'guid': id,
+            'guid': guid,
             'title': `${title}`,
             'year': `${year}`,
             'month': `${month}`,
@@ -111,23 +111,34 @@ export class CalendarEvents {
         }
 
         if (this.isMultipleDaysSelected())
-            await this.createMultipleDaysCalendarEvent(title, cb);
+            await this.createMultipleDaysCalendarEvent(title, refreshCallback);
         else {
-            if (id === undefined || id === "" || id === null) {
-                await CalendarRepo.postData(json);
-                FormHelper.hideForm(this.calendarFormId());
-                cb();
+            const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
+            const isNewRecord = guid === undefined || guid === "" || guid === null;
+
+            if (isNewRecord) {
+                const response = await CalendarRepo.postData(json);
+
+                const responseJson = await response.json();
+                json['guid'] = responseJson['guid'];
+
+                currentMonthRecords.push(json);
             }
             else {
                 await CalendarRepo.updateData(json);
-                FormHelper.hideForm(this.calendarFormId());
-                cb();
+
+                let index = currentMonthRecords.findIndex((x) => { return x['guid'] === guid; });
+                currentMonthRecords[index] = json;
             }
+
+            DataStore.setValue('currentMonthCalendarRecords', currentMonthRecords);
+            FormHelper.hideForm(this.calendarFormId());
+            refreshCallback();
         }
         return false;
     }
 
-    static async createMultipleDaysCalendarEvent(title, cb) {
+    static async createMultipleDaysCalendarEvent(title, refreshCallback) {
         const startDate = new Date(document.getElementById(`eventFrom`).value);
         const endDate = new Date(document.getElementById(`eventTo`).value);
         const dates = DateHelper.getDatesFromDateRange(startDate, endDate);
@@ -153,7 +164,7 @@ export class CalendarEvents {
         const month = DateHelper.getMonth();
         await CalendarRepo.getData(year, month);
         FormHelper.hideForm(this.calendarFormId());
-        cb();
+        refreshCallback();
     }
 
     static isMultipleDaysSelected() {
@@ -161,8 +172,8 @@ export class CalendarEvents {
     }
 
     static openUpdateCalendarForm() {
-        const id = event.currentTarget.id;
-        const calendarRecord = this.getCalendarRecordById(id);
+        const guid = event.currentTarget.id;
+        const calendarRecord = this.getCalendarRecordById(guid);
 
         $('#multipleDays').hide();
         $('#dateRange').hide();
@@ -179,13 +190,13 @@ export class CalendarEvents {
         this.setCalendarFormValues(`Update event on ${calendarRecord.day}`,
             calendarRecord.title,
             WebTimeHelper.webTimeToString(date),
-            calendarRecord.id);
+            calendarRecord.guid);
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId());
     }
 
-    static getCalendarRecordById(id) {
-        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => calendarRecord.id === event.currentTarget.id);
+    static getCalendarRecordById(guid) {
+        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => {return calendarRecord.guid === guid});
     }
 
     static openAddCalendarForm(day) {
@@ -209,8 +220,8 @@ export class CalendarEvents {
             console.log(`Invalid form type: ${formType}`);
     }
 
-    static setCalendarFormValues(formTitle, eventTitle, time, id) {
-        document.getElementById('eventId').value = id;
+    static setCalendarFormValues(formTitle, eventTitle, time, guid) {
+        document.getElementById('eventId').value = guid;
         document.getElementById('formTitle').innerHTML = formTitle;
         this.updateInputNode('eventTitle', eventTitle, 'title');
         this.updateInputNode('eventTime', time, '');

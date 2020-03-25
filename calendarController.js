@@ -35,8 +35,8 @@ export class CalendarController {
         CalendarEvents.onUpdateCalendarEventClick();
         CalendarEvents.onDeleteCalendarEventClick(this.refreshCalendarPage);
         CalendarEvents.onCancelCalendarEventClick();
-        CalendarEvents.onCreateOrUpdateCalendarEventClick(this.loadCalendarPage);
-        CalendarEvents.onMultipleCalendarDaysEventClick(this.loadCalendarPage);
+        CalendarEvents.onCreateOrUpdateCalendarEventClick(this.refreshCalendarPage);
+        CalendarEvents.onMultipleCalendarDaysEventClick(this.refreshCalendarPage);
     }
 
     static async updateMonth(isNextMonth) {

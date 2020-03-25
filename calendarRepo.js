@@ -1,5 +1,4 @@
 import { DataStore } from './dataStore.js';
-import { GeneralHelper } from './generalHelper.js';
 
 export class CalendarRepo {
 
@@ -15,7 +14,7 @@ export class CalendarRepo {
         let jsonArray = [];
         json.forEach(row => {
             jsonArray.push({
-                'id': row[0],
+                'guid': row[0],
                 'title': row[1],
                 'year': row[2],
                 'month': row[3],
@@ -49,8 +48,8 @@ export class CalendarRepo {
         });
     }
 
-    static deleteData(id) {
-        return fetch(`${this.getBaseUrl()}/${id}`, {
+    static deleteData(guid) {
+        return fetch(`${this.getBaseUrl()}/${guid}`, {
             method: 'delete',
         });
     }
