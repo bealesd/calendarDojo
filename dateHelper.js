@@ -30,7 +30,7 @@ export class DateHelper {
         return days;
     }
 
-    static updateDate(isNextMonth) {
+    static changeMonth(isNextMonth) {
         let month = this.getMonth();
         let year = this.getYear();
         if (isNextMonth) {
@@ -125,7 +125,7 @@ export class DateHelper {
     }
 
     static getDatesFromDateRange(startDate, endDate) {
-        let dateArray = new Array();
+        const dateArray = new Array();
         let currentDate = startDate;
         while (currentDate <= endDate) {
             dateArray.push(new Date(currentDate));

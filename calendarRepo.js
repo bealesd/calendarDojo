@@ -7,28 +7,12 @@ export class CalendarRepo {
         return 'http://127.0.0.1:5000/events'
     }
 
-    static async getData(year, month) {
+    static async getRecords(year, month) {
         const response = await fetch(`${this.getBaseUrl()}?year=${year}&month=${month}`);
-        const json = await response.json();
-
-        let jsonArray = [];
-        json.forEach(row => {
-            jsonArray.push({
-                'guid': row[0],
-                'title': row[1],
-                'year': row[2],
-                'month': row[3],
-                'day': row[4],
-                'hour': row[5],
-                'minute': row[6]
-            });
-        });
-
-        DataStore.setValue('currentMonthCalendarRecords', jsonArray);
-        return jsonArray;
+        return await response.json();
     }
 
-    static postData(json) {
+    static postRecord(json) {
         return fetch(this.getBaseUrl(), {
             method: 'post',
             headers: {
@@ -38,7 +22,7 @@ export class CalendarRepo {
         });
     }
 
-    static updateData(json) {
+    static updateRecord(json) {
         return fetch(`${this.getBaseUrl()}/${json['guid']}`, {
             method: 'put',
             headers: {
@@ -48,7 +32,7 @@ export class CalendarRepo {
         });
     }
 
-    static deleteData(guid) {
+    static deleteRecord(guid) {
         return fetch(`${this.getBaseUrl()}/${guid}`, {
             method: 'delete',
         });

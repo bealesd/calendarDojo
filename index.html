@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="./bootstrap.min.css">
 
     <link rel="shortcut icon" href="#" />
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
-    <script src="./jquery.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="./style.css" />
 
@@ -40,7 +38,25 @@
         <h3 id="formTitle">Title</h3>
         <div hidden id="eventId"></div>
         <input id="eventTitle" type="text" name="title" placeholder="title"><br>
-        <input id="eventTime" type="time" name="when" step='900'><br>
+
+        <div class="timePicker" id="eventTime">
+            <div>
+                <span>
+                    <label for="hour">Hour:</label>
+                    <select id="hour" name="hour">
+                    </select>
+                </span>
+            </div>
+            <div>
+                <span>
+                    <label for="minute">Minute:</label>
+                    <select id="minute" name="minute">
+                    </select>
+                </span>
+            </div>
+        </div>
+
+        <!-- <input id="eventTime" type="time" name="when" step='900'><br> -->
 
         <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox"
                 name="checkbox"><br></span>
@@ -55,21 +71,12 @@
     </form>
 
     <script>
-        // if ('serviceWorker' in navigator) {
-        //     navigator.serviceWorker.register('./serviceWorker.js', { scope: './' }).then(function (registration) {
-        //         console.log('Service worker registration succeeded:', registration);
-        //     }, function (error) {
-        //         console.log('Service worker registration failed:', error);
-        //     });
-        // }
-
-        $("#neonToggle").on("click", function () {
+        document.querySelector("#neonToggle").addEventListener("click", () => {
             if (document.getElementsByClassName('heading')[0].classList.contains('headingAnimation'))
                 document.getElementsByClassName('heading')[0].classList.remove('headingAnimation');
             else
                 document.getElementsByClassName('heading')[0].classList.add('headingAnimation');
-        }.bind(this));
-
+        });
     </script>
 
     <script type="module">

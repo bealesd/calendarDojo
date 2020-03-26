@@ -7,12 +7,12 @@ import { CalendarMenu } from './calendarMenu.js';
 
 export class CalendarController {
     static async main() {
-        this.setCurrentMonth();
+        this.setCurrentYearAndMonth();
         await this.loadCalendarPage();
         CalendarMenu.setCalendarMenu(this.updateMonth);
     }
 
-    static setCurrentMonth() {
+    static setCurrentYearAndMonth() {
         const year = DateHelper.getTodaysDate().year;
         const month = DateHelper.getTodaysDate().month;
         DataStore.setValue('year', year);
@@ -20,9 +20,10 @@ export class CalendarController {
     }
 
     static async loadCalendarPage() {
-        await CalendarRepo.getData(DateHelper.getYear(), DateHelper.getMonth());
-        DrawCalendar.drawCalendar();
-        CalendarController.registerCalendarPageEventListeners();
+        const recordsArray = await CalendarRepo.getRecords(DateHelper.getYear(), DateHelper.getMonth());
+        DataStore.storeRecords(recordsArray);
+
+        CalendarController.refreshCalendarPage();
     }
 
     static async refreshCalendarPage() {
@@ -40,7 +41,7 @@ export class CalendarController {
     }
 
     static async updateMonth(isNextMonth) {
-        DateHelper.updateDate(isNextMonth);
+        DateHelper.changeMonth(isNextMonth);
         await CalendarController.loadCalendarPage();
     }
 }

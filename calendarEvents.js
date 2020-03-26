@@ -2,7 +2,6 @@ import { DataStore } from './dataStore.js';
 import { FormHelper } from './formHelper.js';
 import { CustomEvents } from './customEvents.js';
 import { DateHelper } from './dateHelper.js';
-import { WebTimeHelper } from './webTimeHelper.js';
 import { CalendarRepo } from './calendarRepo.js';
 
 export class CalendarEvents {
@@ -12,9 +11,8 @@ export class CalendarEvents {
 
     static onAddCalendarClick() {
         document.querySelectorAll('.calendar > div > .block > .add').forEach((block) => {
-            const day = block.parentNode.id;
             new CustomEvents().overwriteEvents('mouseup', block, () => {
-                this.openAddCalendarForm(day);
+                this.openAddCalendarForm();
             });
         });
     }
@@ -35,9 +33,15 @@ export class CalendarEvents {
     }
 
     static onCreateOrUpdateCalendarEventClick(refreshCallback) {
+        //TODO dry?
         const element = document.querySelector('#eventAddOrUpdateButton');
+        document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'add';
+
         new CustomEvents().overwriteEvents('mouseup', element, () => {
-            this.createOrUpdateCalendarEvent(refreshCallback);
+            if (document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'add')
+                this.createCalendarEvent(refreshCallback);
+            else if (document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'update')
+                this.updateCalendarEvent(refreshCallback);
         });
     }
 
@@ -56,38 +60,35 @@ export class CalendarEvents {
     }
 
     static multipleCalendarDaysEventClick() {
-        $('#dateRange').toggle();
+        const dateRangeElement = document.querySelector('#dateRange');
+        dateRangeElement.style.display = dateRangeElement.style.display === 'none' ?
+            dateRangeElement.style.display = 'block' :
+            dateRangeElement.style.display = 'none'
     }
 
     static async deleteCalendarEvent(refreshCallback) {
-        const guid = document.getElementById('eventId').value;
-        await CalendarRepo.deleteData(guid);
+        const guid = document.querySelector('#eventId').value;
+        await CalendarRepo.deleteRecord(guid);
 
-        FormHelper.hideForm(this.calendarFormId());
-
-        let records = DataStore.getValue('currentMonthCalendarRecords');
-        const filteredRecords = records.filter((record) => {
-            return record['guid'] !== guid;
+        let currentMonthCalendarRecords = DataStore.getValue('currentMonthCalendarRecords');
+        const filteredRecords = currentMonthCalendarRecords.filter((currentMonthCalendarRecords) => {
+            return currentMonthCalendarRecords['guid'] !== guid;
         });
-        DataStore.setValue('currentMonthCalendarRecords', filteredRecords);
 
-        refreshCallback();
+        this.closeCalendarForm(filteredRecords, refreshCallback);
     }
 
-    static async createOrUpdateCalendarEvent(refreshCallback) {
+    static async updateCalendarEvent(refreshCallback) {
         const guid = document.getElementById("eventId").value;
+        const calendarRecord = this.getCalendarRecordById(guid);
+
         const title = document.getElementById("eventTitle").value;
+        const hour = document.querySelector('#hour').value;
+        const minute = document.querySelector('#minute').value;
 
-        const time = document.getElementById("eventTime").value;
-        const hoursAndMinutesArray = WebTimeHelper.webTimeToArray(time);
-        DateHelper.setHour(hoursAndMinutesArray[0]);
-        DateHelper.setMinute(hoursAndMinutesArray[1]);
-
-        const year = DateHelper.getYear();
-        const month = DateHelper.getMonth();
-        const day = DateHelper.getDay();
-        const hour = DateHelper.getHour();
-        const minute = DateHelper.getMinute();
+        const year = calendarRecord['year'];
+        const month = calendarRecord['month'];
+        const day = calendarRecord['day'];
 
         let json = {
             'guid': guid,
@@ -101,53 +102,43 @@ export class CalendarEvents {
 
         if (title.trim().length === 0) {
             alert('form incomplete');
-            return false;
+            return;
         }
-        const isValidDateRange = Date.parse(document.getElementById(`eventFrom`).value) < Date.parse(document.getElementById(`eventTo`).value);
+        const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
+        await CalendarRepo.updateRecord(json);
 
-        if (this.isMultipleDaysSelected() && !isValidDateRange) {
-            alert('invalid date');
-            return false;
-        }
+        let calendarRecordToUpdateIndex = currentMonthRecords.findIndex((x) => { return x['guid'] === guid; });
+        currentMonthRecords[calendarRecordToUpdateIndex] = json;
 
-        if (this.isMultipleDaysSelected())
-            await this.createMultipleDaysCalendarEvent(title, refreshCallback);
-        else {
-            const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
-            const isNewRecord = guid === undefined || guid === "" || guid === null;
-
-            if (isNewRecord) {
-                const response = await CalendarRepo.postData(json);
-
-                const responseJson = await response.json();
-                json['guid'] = responseJson['guid'];
-
-                currentMonthRecords.push(json);
-            }
-            else {
-                await CalendarRepo.updateData(json);
-
-                let index = currentMonthRecords.findIndex((x) => { return x['guid'] === guid; });
-                currentMonthRecords[index] = json;
-            }
-
-            DataStore.setValue('currentMonthCalendarRecords', currentMonthRecords);
-            FormHelper.hideForm(this.calendarFormId());
-            refreshCallback();
-        }
-        return false;
+        this.closeCalendarForm(currentMonthRecords, refreshCallback);
     }
 
-    static async createMultipleDaysCalendarEvent(title, refreshCallback) {
-        const startDate = new Date(document.getElementById(`eventFrom`).value);
-        const endDate = new Date(document.getElementById(`eventTo`).value);
+    static async createCalendarEvent(refreshCallback) {
+        const title = document.querySelector("#eventTitle").value;
+
+        const hour = document.querySelector('#hour').value;
+        const minute = document.querySelector('#minute').value;
+
+        if (title.trim().length === 0) {
+            alert('Title is empty!');
+            throw Error('Message: Title is empty!. \nMethod: createCalendarEvent');
+        }
+
+        const isValidDateRange = Date.parse(document.querySelector(`#eventFrom`).value) <= Date.parse(document.querySelector(`#eventTo`).value);
+        if (!isValidDateRange) {
+            alert('Invalid date range!');
+            throw Error('Message: Date range is invalid!.\nMethod: createCalendarEvent');
+        }
+
+        const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
+        const startDate = new Date(document.querySelector(`#eventFrom`).value);
+        const endDate = new Date(document.querySelector(`#eventTo`).value);
         const dates = DateHelper.getDatesFromDateRange(startDate, endDate);
+
         for (let i = 0; i < dates.length; i++) {
-            const day = dates[i].getDate();
-            const month = dates[i].getMonth();
             const year = dates[i].getFullYear();
-            const hour = DateHelper.getHour();
-            const minute = DateHelper.getMinute();
+            const month = dates[i].getMonth();
+            const day = dates[i].getDate();
 
             let json = {
                 'title': `${title}`,
@@ -157,74 +148,101 @@ export class CalendarEvents {
                 'hour': `${hour}`,
                 'minute': `${minute}`
             };
-            await CalendarRepo.postData(json);
+
+            const response = await CalendarRepo.postRecord(json);
+            const responseJson = await response.json();
+            json['guid'] = responseJson['guid'];
+            currentMonthRecords.push(json);
         }
 
-        const year = DateHelper.getYear();
-        const month = DateHelper.getMonth();
-        await CalendarRepo.getData(year, month);
+        document.querySelector('#eventMultipleDays').checked = false;
+
+        this.closeCalendarForm(currentMonthRecords, refreshCallback);
+    }
+
+    static closeCalendarForm(currentMonthRecords, refreshCallback) {
+        DataStore.setValue('currentMonthCalendarRecords', currentMonthRecords);
         FormHelper.hideForm(this.calendarFormId());
         refreshCallback();
     }
 
     static isMultipleDaysSelected() {
-        return $('#eventMultipleDays')[0].checked;
+        return document.querySelector('#eventMultipleDays').checked;
     }
 
     static openUpdateCalendarForm() {
-        const guid = event.currentTarget.id;
+        const guid = event.currentTarget.dataset.guid;
         const calendarRecord = this.getCalendarRecordById(guid);
 
-        $('#multipleDays').hide();
-        $('#dateRange').hide();
-
-        let date = new Date();
-        date.setFullYear(calendarRecord['year']);
-        date.setMonth(calendarRecord['month'])
-        date.setDate(calendarRecord['day']);
-        date.setHours(calendarRecord['hour']);
-        date.setMinutes(calendarRecord['minute']);
+        document.querySelector('#multipleDays').style.display = 'none';
+        document.querySelector('#dateRange').style.display = 'none';
 
         DateHelper.setDay(calendarRecord.day);
         this.setCalendarFormType('Update');
-        this.setCalendarFormValues(`Update event on ${calendarRecord.day}`,
-            calendarRecord.title,
-            WebTimeHelper.webTimeToString(date),
-            calendarRecord.guid);
+        this.setCalendarFormValues(
+            `Update event on ${calendarRecord.day}`,
+            calendarRecord['title'],
+            calendarRecord['hour'],
+            calendarRecord['minute'],
+            calendarRecord['guid']
+        );
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId());
     }
 
     static getCalendarRecordById(guid) {
-        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => {return calendarRecord.guid === guid});
+        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => { return calendarRecord.guid === guid });
     }
 
-    static openAddCalendarForm(day) {
-        $('#eventMultipleDays')[0].checked = false;
-        $('#multipleDays').show();
-        $('#dateRange').hide();
+    static setCalenderFormDateRange() {
+        //TODO - DRY
+        const year = DateHelper.getYear();
+        let month = DateHelper.getMonth();
+        let day = DateHelper.getDay();
 
+        month = parseInt(month) + 1;
+        month = (month < 10) ? ("0" + month) : month;
+
+        day = parseInt(day);
+        day = (day < 10) ? ("0" + day) : day;
+
+        document.querySelector(`#eventFrom`).value = `${year}-${month}-${day}`;
+        document.querySelector(`#eventTo`).value = `${year}-${month}-${day}`;
+    }
+
+    static openAddCalendarForm() {
+        document.querySelector('#eventMultipleDays').checked = false;
+        document.querySelector('#multipleDays').style.display = 'block';
+        document.querySelector('#dateRange').style.display = 'none';
+
+        let day = event.srcElement.parentNode.dataset['day'];
         DateHelper.setDay(day);
+
+        this.setCalenderFormDateRange();
+
         this.setCalendarFormType('Add');
-        this.setCalendarFormValues(`Add event for day ${day}`, '', '10:00', '', '', '');
+        this.setCalendarFormValues(`Add event for day ${day}`, '', '10', '0', '', '', '');
         this.setCalendarFormPosition();
         FormHelper.showForm(this.calendarFormId());
     }
 
     static setCalendarFormType(formType) {
         if (formType.toLowerCase() === 'update')
-            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Update';
+            document.querySelector('#eventAddOrUpdateButton').innerHTML = 'Update';
         else if (formType.toLowerCase() === 'add')
-            document.getElementById('eventAddOrUpdateButton').innerHTML = 'Add';
+            document.querySelector('#eventAddOrUpdateButton').innerHTML = 'Add';
         else
             console.log(`Invalid form type: ${formType}`);
     }
 
-    static setCalendarFormValues(formTitle, eventTitle, time, guid) {
-        document.getElementById('eventId').value = guid;
-        document.getElementById('formTitle').innerHTML = formTitle;
+    static setCalendarFormValues(formTitle, eventTitle, hour, minute, guid) {
+        document.querySelector('#eventId').value = guid;
+        document.querySelector('#formTitle').innerHTML = formTitle;
         this.updateInputNode('eventTitle', eventTitle, 'title');
-        this.updateInputNode('eventTime', time, '');
+        hour = parseInt(hour);
+        document.querySelector('#hour').value = (hour < 10) ? ("0" + hour) : hour;
+        minute = parseInt(minute);
+        document.querySelector('#minute').value = (minute < 10) ? ("0" + minute) : minute;
     }
 
     static setCalendarFormPosition() {
@@ -233,14 +251,14 @@ export class CalendarEvents {
         const windowWidth = window.innerWidth;
         const formWidth = '298';
         const formHeight = '267.4';
-        const style = document.getElementById(this.calendarFormId()).style;
+        const style = document.querySelector(`#${this.calendarFormId()}`).style;
 
         style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
         style.left = `${(windowWidth - formWidth) / 2}px`;
     }
 
     static updateInputNode(id, value, placeholder) {
-        const inputNode = document.getElementById(id);
+        const inputNode = document.querySelector(`#${id}`);
         inputNode.value = value;
         inputNode.placeholder = placeholder;
     }

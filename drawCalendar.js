@@ -20,6 +20,8 @@ export class DrawCalendar {
         DrawCalendar.updateCalendarColors();
         DrawCalendar.setMonthAndYearText(DateHelper.getMonth(), DateHelper.getMonthName(), DateHelper.getYear());
         DrawCalendar.setCalendarBorder();
+
+        DrawCalendar.setupCalendarFormTimePicker();
     }
 
     static setCalendarBorder() {
@@ -39,28 +41,58 @@ export class DrawCalendar {
         DataStore.setValue('month', month);
     }
 
+    static setupCalendarFormTimePicker() {
+        const hourSelect = document.querySelector('#hour');
+        const minuteSelect = document.querySelector('#minute');
+
+        populateHours();
+        populateMinutes();
+
+        function populateHours() {
+            for (let i = 0; i <= 23; i++) {
+                let option = document.createElement('option');
+                option.textContent = (i < 10) ? ("0" + i) : i;
+                hourSelect.appendChild(option);
+            }
+        }
+
+        function populateMinutes() {
+            for (let i = 0; i <= 59; i = i + 15) {
+                let option = document.createElement('option');
+                option.textContent = (i < 10) ? ("0" + i) : i;
+                minuteSelect.appendChild(option);
+            }
+        }
+    }
+
     static drawCalendarEvents(dayNames) {
         const refNode = document.getElementById('calendarContainer');
         const style = `style='height:${this.calculateBlockHeight()}px;'`;
 
         for (let day = 1; day <= this.daysInMonth; day++) {
-            const node = `<div id='${day}' class='block' ${style}><p class='add'>${day} - ${dayNames[day]}</p><table><tbody></tbody></table></div>`;
-            refNode.innerHTML += node;
+            const recordContainerNode =
+                `<div data-day='${day}' class='block' ${style}>` +
+                `<p class='add'>${day} - ${dayNames[day]}</p>` +
+                `<table>` +
+                `<tbody>` +
+                `</tbody>` +
+                `</table>` +
+                `</div>`;
+            refNode.innerHTML += recordContainerNode;
         }
 
-        let calendarArray = DataStore.getValue('currentMonthCalendarRecords');
-        const keys = Object.keys(calendarArray);
-        for (let i = 0; i < keys.length; i++) {
-            const calendarEvent = calendarArray[keys[i]];
-            const dayRow = this.createCalendarDayRow(calendarEvent);
-            document.querySelector(`[id='${calendarEvent.day}'] tbody`).innerHTML += dayRow;
+        const calendarArray = DataStore.getValue('currentMonthCalendarRecords');
+        for (let i = 0; i < calendarArray.length; i++) {
+            const calendarRecord = calendarArray[i];
+            const calendarRecordHtml = this.createCalendarDayRow(calendarRecord);
+            document.querySelector(`[data-day='${calendarRecord["day"]}'] tbody`).innerHTML += calendarRecordHtml;
         }
 
         this.setColors();
     }
 
     static highlightCurrentDay(day) {
-        document.getElementById(`${day}`).classList.add('highlightBlock');
+        document.querySelector(`[data-day='${day}']`).classList.add('highlightBlock');
     }
 
     static calculateBlockHeight() {
@@ -82,17 +114,17 @@ export class DrawCalendar {
     }
 
     static createCalendarDayRow(calendarEvent) {
-        let date = new Date();
-        date.setFullYear(calendarEvent['year']);
-        date.setMonth(calendarEvent['month'])
-        date.setDate(calendarEvent['day']);
-        date.setHours(calendarEvent['hour']);
-        date.setMinutes(calendarEvent['minute']);
-        // TODO - stop using date
-        const time = WebTimeHelper.webTimeToString(date);
-        return `<tr><td class="calendarEventTitle" id='${calendarEvent.guid}'>
-                ${time}&nbsp<em>${calendarEvent.title}</em>
-                </td></tr>`;
+        let minute = calendarEvent['minute'];
+        minute = parseInt(minute);
+        minute = (minute < 10) ? ("0" + minute) : minute;
+
+        let hour = calendarEvent['hour'];
+        hour = parseInt(hour);
+        hour = (hour < 10) ? ("0" + hour) : hour;
+
+        return `<tr><td class="calendarEventTitle" data-guid='${calendarEvent["guid"]}'>` +
+            `${hour}:${minute}&nbsp<em>${calendarEvent["title"]}</em>` +
+            `</td></tr>`;
     }
 
     static updateCalendarColors() {
@@ -109,9 +141,9 @@ export class DrawCalendar {
     }
 
     static setCalendarColors(daysInMonth, colors) {
-        for (let i = 0; i < daysInMonth; i++) {
-            const node = document.getElementById(`${i + 1}`);
-            node.style.border = `3px solid ${colors[i % colors.length]}`;
+        for (let dayInMonth = 0; dayInMonth < daysInMonth; dayInMonth++) {
+            const node = document.querySelector(`[data-day='${dayInMonth + 1}']`)
+            node.style.border = `3px solid ${colors[dayInMonth % colors.length]}`;
         }
     }
 
