@@ -1,6 +1,6 @@
 import { DataStore } from './dataStore.js';
-import { WebTimeHelper } from './webTimeHelper.js';
 import { DateHelper } from './dateHelper.js';
+import { CalendarHelper } from './calendarHelper.js';
 
 export class DrawCalendar {
     constructor() {
@@ -20,8 +20,6 @@ export class DrawCalendar {
         DrawCalendar.updateCalendarColors();
         DrawCalendar.setMonthAndYearText(DateHelper.getMonth(), DateHelper.getMonthName(), DateHelper.getYear());
         DrawCalendar.setCalendarBorder();
-
-        DrawCalendar.setupCalendarFormTimePicker();
     }
 
     static setCalendarBorder() {
@@ -49,17 +47,17 @@ export class DrawCalendar {
         populateMinutes();
 
         function populateHours() {
-            for (let i = 0; i <= 23; i++) {
+            for (let hour = 0; hour <= 23; hour++) {
                 let option = document.createElement('option');
-                option.textContent = (i < 10) ? ("0" + i) : i;
+                option.textContent = CalendarHelper.padInt(hour, 2);
                 hourSelect.appendChild(option);
             }
         }
 
         function populateMinutes() {
-            for (let i = 0; i <= 59; i = i + 15) {
+            for (let minute = 0; minute <= 59; minute = minute + 15) {
                 let option = document.createElement('option');
-                option.textContent = (i < 10) ? ("0" + i) : i;
+                option.textContent = CalendarHelper.padInt(minute, 2);
                 minuteSelect.appendChild(option);
             }
         }
@@ -98,10 +96,13 @@ export class DrawCalendar {
     static calculateBlockHeight() {
         const calendarArray = DataStore.getValue('currentMonthCalendarRecords');
         let maxDaysCount = 0;
+
+        //populate daysInMonth
         let daysCount = {};
-        for (let i = 0; i < this.daysInMonth; i++) {
-            daysCount[i] = 0;
+        for (let dayInMonth = 0; dayInMonth < this.daysInMonth; dayInMonth++) {
+            daysCount[dayInMonth] = 0;
         }
+
         const calendarKeys = Object.keys(calendarArray);
         for (let j = 0; j < calendarKeys.length; j++) {
             daysCount[calendarArray[calendarKeys[j]].day]++;
@@ -114,13 +115,8 @@ export class DrawCalendar {
     }
 
     static createCalendarDayRow(calendarEvent) {
-        let minute = calendarEvent['minute'];
-        minute = parseInt(minute);
-        minute = (minute < 10) ? ("0" + minute) : minute;
-
-        let hour = calendarEvent['hour'];
-        hour = parseInt(hour);
-        hour = (hour < 10) ? ("0" + hour) : hour;
+        const hour = CalendarHelper.padInt(calendarEvent['hour'], 2);
+        const minute = CalendarHelper.padInt(calendarEvent['minute'], 2);
 
         return `<tr><td class="calendarEventTitle" data-guid='${calendarEvent["guid"]}'>` +
             `${hour}:${minute}&nbsp<em>${calendarEvent["title"]}</em>` +

@@ -1,27 +1,17 @@
-import { WebTimeHelper } from './webTimeHelper.js';
-
 export class CalendarHelper {
-    static compareCalendarEventsByTime(calendarEventOne, calendarEventTwo) {
-        let timeOneHours = WebTimeHelper.webTimeToString(calendarEventOne.time)[0];
-        let timeOneMins = WebTimeHelper.webTimeToString(calendarEventOne.time)[1];
-        let timeTwoHours = WebTimeHelper.webTimeToString(calendarEventTwo.time)[0];
-        let timeTwoMins = WebTimeHelper.webTimeToString(calendarEventTwo.time)[1];
 
-        if (timeOneHours < timeTwoHours) return -1;
-        else if (timeOneHours > timeTwoHours) return 1;
-        else if (timeOneHours === timeTwoHours && timeOneMins > timeTwoMins) return 1;
-        else if (timeOneHours === timeTwoHours && timeOneMins < timeTwoMins) return -1;
-        return 0;
-    }
+    static compareByTime(a, b) {
+        let is_hour_a_before_b = a.hour < b.hour ? true : (a.hour === b.hour ? null : false);
+        let is_minute_a_before_b = a.minute < b.minute ? true : (a.minute === b.minute ? null : false);
+        
+        let is_a_before_b = is_hour_a_before_b || (is_hour_a_before_b === null && is_minute_a_before_b);
+        let is_a_same_as_b = is_hour_a_before_b === null && is_minute_a_before_b === null;
 
-    static compareByTime(calendarEventOne, calendarEventTwo) {
-        if (calendarEventOne.time < calendarEventTwo.time) return -1;
-        else if (calendarEventTwo.time > calendarEventOne.time) return 1;
-        return 0;
+        return is_a_before_b ? -1 : (is_a_same_as_b ? 1 : 0);
     }
 
     static removeSubMenu() {
-        document.getElementsByClassName('subMenu')[0].innerHTML = '';
+        document.querySelector('.subMenu').innerHTML = '';
     }
 
     static resizeThrottler(callback) {
@@ -34,12 +24,18 @@ export class CalendarHelper {
         }
     }
 
-    static sortCalendarEvents(calendarEventJson) {
-        let calendarEventsArray = [];
-        Object.keys(calendarEventJson).forEach(function (guid) { calendarEventsArray.push(calendarEventJson[guid]); });
-        calendarEventsArray.sort(CalendarHelper.compareByTime);
-        let soughtedCalendarEventJson = {};
-        calendarEventsArray.forEach(function (event) { soughtedCalendarEventJson[event[guid]] = event; });
-        return soughtedCalendarEventJson;
+    static padInt(number, padLength) {
+        let safeNumber = parseInt(number);
+        if (isNaN(safeNumber))
+            throw Error(`Message: number is not an int: ${number}!\nMethod: padInteger!`)
+
+        let safePadLength = parseInt(padLength);
+        if (isNaN(safePadLength))
+            throw Error(`Message: padLength is not an int: ${padLength}!\nMethod: padInteger!`)
+
+        let numberLength = `${safeNumber}`.length;
+        let paddingZeros = '0'.repeat(safePadLength - numberLength);
+        let paddedNumber = `${paddingZeros}${safeNumber}`;
+        return paddedNumber;
     }
 }

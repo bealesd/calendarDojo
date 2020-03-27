@@ -1,3 +1,5 @@
+import {CalendarHelper} from './calendarHelper.js'
+
 export class DataStore {
     static getValue(key) { return JSON.parse(localStorage.getItem(key)); }
 
@@ -17,6 +19,12 @@ export class DataStore {
             });
         });
 
+        records = records.sort(CalendarHelper.compareByTime);
+
         DataStore.setValue('currentMonthCalendarRecords', records);
+    }
+
+    static getCalendarRecordById(guid) {
+        return DataStore.getValue('currentMonthCalendarRecords').find((calendarRecord) => { return calendarRecord.guid === guid });
     }
 }
