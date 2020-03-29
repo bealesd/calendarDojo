@@ -2,6 +2,7 @@ body {
     margin: 0px;
     width: 100%;
     background-color: black;
+    font: Arial, Helvetica, sans-serif;
 }
 
 .navbar {
@@ -34,17 +35,6 @@ body {
     color: hotpink;
     font-size: 12px;
 }
-
-/*.form {
-    z-index: 1;
-    font-family: 'Open Sans Condensed', arial, sans;
-    background: #FFFFFF;
-    margin: 30px auto;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.22);
-    -moz-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.22);
-    -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.22);
-    width: 300px;
-}*/
 
 .inputField {
     box-sizing: border-box;
@@ -91,7 +81,6 @@ body {
 }
 
 .text,
-.date,
 .password {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;

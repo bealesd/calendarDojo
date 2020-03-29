@@ -5,10 +5,6 @@
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
     <title>Calendar</title>
 
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
-    <link rel="stylesheet" href="./bootstrap.min.css">
-
     <link rel="shortcut icon" href="#" />
 
     <link rel="stylesheet" type="text/css" href="./style.css" />
@@ -21,15 +17,13 @@
         <div class="subMenu"></div>
     </div>
 
+    
     <div>
-        <a id="neonToggle"><span class="glyphicon glyphicon-off"></span></a>
+        <img id="neonToggle" style='height:30px; padding-top: 5px;' class="" id="" src="./fonts/powerButton.svg">
     </div>
 
     <div class="main calendar">
-        <p id="calendarStatus"></p>
         <p class="heading" id="date"></p>
-        <br>
-        <br>
         <div id="calendarContainer"></div>
     </div>
 
@@ -55,8 +49,6 @@
                 </span>
             </div>
         </div>
-
-        <!-- <input id="eventTime" type="time" name="when" step='900'><br> -->
 
         <span id="multipleDays">MultipleDays &nbsp;<input id="eventMultipleDays" type="checkbox"
                 name="checkbox"><br></span>
@@ -84,7 +76,7 @@
         import { TypeCheck } from './typeCheck.js';
         new TypeCheck();
 
-        CalendarController.main();
+        new CalendarController().main();
     </script>
 
 </body>

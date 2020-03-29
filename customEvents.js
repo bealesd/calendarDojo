@@ -1,9 +1,11 @@
 export class CustomEvents {
     constructor() {
+        //TODO - move to another store?
         window.events = window.events || {};
     }
 
     overwriteEvents(eventType, element, callback, callbackArgs) {
+        //eventType: click, element: dom element
         this.removeEvents(eventType, element);
         this.addEvent(eventType, element, callback, callbackArgs);
     }

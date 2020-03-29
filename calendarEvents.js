@@ -3,106 +3,131 @@ import { FormHelper } from './formHelper.js';
 import { CustomEvents } from './customEvents.js';
 import { DateHelper } from './dateHelper.js';
 import { CalendarRepo } from './calendarRepo.js';
-import { CalendarHelper } from './calendarHelper.js';
 
 export class CalendarEvents {
-    //TODO remove this, or add all elements in a constructor
-    static calendarFormId() {
-        return 'addOrEditCalendarEvents';
+
+    constructor() {
+        this.customEvents = new CustomEvents();
+        this.formHelper = new FormHelper();
+
+        this.calendarRecordForm = document.querySelector('#addOrEditCalendarEvents');
+        this.calendarRecordFormTitle = document.querySelector('#formTitle');
+
+        this.calendarRecordId = document.querySelector('#eventId');
+        this.calendarRecordTitle = document.querySelector('#eventTitle');
+        this.calendarRecordHour = document.querySelector('#hour');
+        this.calendarRecordMinute = document.querySelector('#minute');
+
+        this.calendarRecordMultipleDays = document.querySelector('#multipleDays');
+        this.calendarRecordMultipleDaysCheckbox = document.querySelector('#eventMultipleDays');
+        this.calendarRecordDateRange = document.querySelector('#dateRange');
+        this.calendarRecordStartDate = document.querySelector('#eventFrom');
+        this.calendarRecordEndDate = document.querySelector('#eventTo');
+
+        this.calendarRecordAddOrUpdateButton = document.querySelector('#eventAddOrUpdateButton');
+        this.calendarRecordDeleteButton = document.querySelector('#eventDelete');
+        this.calendarRecordCloseButton = document.querySelector('#eventClose');
     }
 
     //calendar events
-    static onAddCalendarRecordClick() {
+    onAddCalendarRecordClick() {
         document.querySelectorAll('.calendar > div > .block > .add').forEach((block) => {
-            new CustomEvents().overwriteEvents('mouseup', block, () => {
+            this.customEvents.overwriteEvents('mouseup', block, () => {
                 this.openAddCalendarForm();
             });
         });
     }
 
-    static onUpdateCalendarRecordClick() {
+    onUpdateCalendarRecordClick() {
         document.querySelectorAll('.calendar > div > .block .calendarEventTitle').forEach((calendarEventTitle) => {
-            new CustomEvents().overwriteEvents('mouseup', calendarEventTitle, () => {
+            this.customEvents.overwriteEvents('mouseup', calendarEventTitle, () => {
                 this.openUpdateCalendarForm();
             });
         });
     }
 
     //calendar event handlers
-    static openAddCalendarForm() {
-        document.querySelector('#eventMultipleDays').checked = false;
-        document.querySelector('#multipleDays').style.display = 'block';
-        document.querySelector('#dateRange').style.display = 'none';
+    openAddCalendarForm() {
+        this.calendarRecordMultipleDaysCheckbox.checked = false;
+        this.calendarRecordMultipleDays.style.display = 'block';
+        this.calendarRecordDateRange.style.display = 'none';
 
         let day = event.srcElement.parentNode.dataset['day'];
         DateHelper.setDay(day);
 
-        this.setCalendarFormType('Add');
-        this.setCalendarFormValues(`Add event for day ${day}`, '', '10', '0', '', '', '');
-        this.setCalendarFormPosition();
-        FormHelper.showForm(this.calendarFormId());
+        this.formHelper.setCalendarFormType(FormHelper.FormType.add);
+        this.formHelper.setCalendarFormValues(`Add event for day ${day}`, '', '10', '0', '', '', '');
+        this.formHelper.setCalendarFormPosition();
+        this.formHelper.showForm();
     }
 
-    static openUpdateCalendarForm() {
+    openUpdateCalendarForm() {
         const guid = event.currentTarget.dataset.guid;
         const calendarRecord = DataStore.getCalendarRecordById(guid);
 
-        document.querySelector('#multipleDays').style.display = 'none';
-        document.querySelector('#dateRange').style.display = 'none';
+        this.calendarRecordMultipleDays.style.display = 'none';
+        this.calendarRecordDateRange.style.display = 'none';
 
         DateHelper.setDay(calendarRecord.day);
-        this.setCalendarFormType('Update');
-        this.setCalendarFormValues(
+
+        this.formHelper.setCalendarFormType(FormHelper.FormType.update);
+        this.formHelper.setCalendarFormValues(
             `Update event on ${calendarRecord.day}`,
             calendarRecord['title'],
             calendarRecord['hour'],
             calendarRecord['minute'],
             calendarRecord['guid']
         );
-        this.setCalendarFormPosition();
-        FormHelper.showForm(this.calendarFormId());
+        this.formHelper.setCalendarFormPosition();
+        this.formHelper.showForm();
     }
 
     //calender form events
-    static onCreateOrUpdateCalendarRecordClick(refreshCallback) {
-        const element = document.querySelector('#eventAddOrUpdateButton');
-        document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'add';
-
-        new CustomEvents().overwriteEvents('mouseup', element, () => {
-            if (document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'add')
-                this.createCalendarRecord(refreshCallback);
-            else if (document.querySelector('#eventAddOrUpdateButton').innerHTML.toLowerCase() === 'update')
-                this.updateCalendarRecord(refreshCallback);
+    onCreateOrUpdateCalendarRecordClick(refreshCallback) {
+        this.customEvents.overwriteEvents('mouseup', this.calendarRecordAddOrUpdateButton, () => {
+            this.createOrUpdateCalendarRecord(refreshCallback)
         });
     }
 
-    static onDeleteCalendarRecordClick(refreshCallback) {
-        const element = document.querySelector('#eventDelete');
-        new CustomEvents().overwriteEvents('mouseup', element, () => {
+    onDeleteCalendarRecordClick(refreshCallback) {
+        this.customEvents.overwriteEvents('mouseup', this.calendarRecordDeleteButton, () => {
             this.deleteCalendarRecord(refreshCallback);
         });
     }
 
-    static onCancelCalendarRecordClick() {
-        const element = document.querySelector('#eventClose');
-        new CustomEvents().overwriteEvents('mouseup', element, () => {
-            FormHelper.hideForm(this.calendarFormId());
+    onCancelCalendarRecordClick() {
+        this.customEvents.overwriteEvents('mouseup', this.calendarRecordCloseButton, () => {
+            this.formHelper.hideForm();
         });
     }
 
-    static onMultipleCalendarDaysRecordClick() {
-        const element = document.querySelector('#eventMultipleDays');
-        new CustomEvents().overwriteEvents('mouseup', element, () => {
+    onMultipleCalendarDaysRecordClick() {
+        this.customEvents.overwriteEvents('mouseup', this.calendarRecordMultipleDaysCheckbox, () => {
             this.multipleCalendarDaysRecordClick();
         });
     }
 
     //calendar form event handlers
-    static async createCalendarRecord(refreshCallback) {
-        const title = document.querySelector("#eventTitle").value;
+    createOrUpdateCalendarRecord(refreshCallback) {
+        const calendarFormType = FormHelper.FormType[this.calendarRecordAddOrUpdateButton.innerHTML.toLowerCase()];
+        switch (calendarFormType) {
+            case FormHelper.FormType.add:
+                this.createCalendarRecord(refreshCallback);
+                break;
+            case FormHelper.FormType.update:
+                this.updateCalendarRecord(refreshCallback)
+                break;
+            default:
+                throw Error(`Message: Invalid form type: ${calendarFormType}.` +
+                    `\nMethod: getCalendarFormType.`);
+        }
+    }
 
-        const hour = document.querySelector('#hour').value;
-        const minute = document.querySelector('#minute').value;
+    async createCalendarRecord(refreshCallback) {
+        const title = this.calendarRecordTitle.value;
+
+        const hour = this.calendarRecordHour.value;
+        const minute = this.calendarRecordMinute.value;
 
         if (title.trim().length === 0) {
             alert('Title is empty!');
@@ -116,8 +141,8 @@ export class CalendarEvents {
         }
 
         const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
-        const startDate = new Date(document.querySelector(`#eventFrom`).value);
-        const endDate = new Date(document.querySelector(`#eventTo`).value);
+        const startDate = new Date(this.calendarRecordStartDate.value);
+        const endDate = new Date(this.calendarRecordEndDate.value);
         const dates = DateHelper.getDatesFromDateRange(startDate, endDate);
 
         for (let i = 0; i < dates.length; i++) {
@@ -140,18 +165,18 @@ export class CalendarEvents {
             currentMonthRecords.push(json);
         }
 
-        document.querySelector('#eventMultipleDays').checked = false;
+        this.calendarRecordMultipleDaysCheckbox.checked = false;
 
-        this.closeCalendarForm(currentMonthRecords, refreshCallback);
+        this.formHelper.closeCalendarForm(currentMonthRecords, refreshCallback);
     }
 
-    static async updateCalendarRecord(refreshCallback) {
-        const guid = document.getElementById("eventId").value;
+    async updateCalendarRecord(refreshCallback) {
+        const guid = this.calendarRecordId.value;
         const calendarRecord = DataStore.getCalendarRecordById(guid);
 
-        const title = document.getElementById("eventTitle").value;
-        const hour = document.querySelector('#hour').value;
-        const minute = document.querySelector('#minute').value;
+        const title = this.calendarRecordTitle.value;
+        const hour = this.calendarRecordHour.value;
+        const minute = this.calendarRecordMinute.value;
 
         const year = calendarRecord['year'];
         const month = calendarRecord['month'];
@@ -168,20 +193,20 @@ export class CalendarEvents {
         }
 
         if (title.trim().length === 0) {
-            alert('form incomplete');
-            return;
+            alert('Title is empty!');
+            throw Error('Message: Title is empty!. \nMethod: updateCalendarRecord.');
         }
         const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
         await CalendarRepo.updateRecord(json);
 
-        let calendarRecordToUpdateIndex = currentMonthRecords.findIndex((x) => { return x['guid'] === guid; });
+        let calendarRecordToUpdateIndex = currentMonthRecords.findIndex((record) => { return record['guid'] === guid; });
         currentMonthRecords[calendarRecordToUpdateIndex] = json;
 
-        this.closeCalendarForm(currentMonthRecords, refreshCallback);
+        this.formHelper.closeCalendarForm(currentMonthRecords, refreshCallback);
     }
 
-    static async deleteCalendarRecord(refreshCallback) {
-        const guid = document.querySelector('#eventId').value;
+    async deleteCalendarRecord(refreshCallback) {
+        const guid = this.calendarRecordId.value;
         await CalendarRepo.deleteRecord(guid);
 
         let currentMonthCalendarRecords = DataStore.getValue('currentMonthCalendarRecords');
@@ -189,58 +214,12 @@ export class CalendarEvents {
             return currentMonthCalendarRecords['guid'] !== guid;
         });
 
-        this.closeCalendarForm(filteredRecords, refreshCallback);
+        this.formHelper.closeCalendarForm(filteredRecords, refreshCallback);
     }
 
-    static multipleCalendarDaysRecordClick() {
-        const dateRangeElement = document.querySelector('#dateRange');
-        dateRangeElement.style.display = dateRangeElement.style.display === 'none' ?
-            dateRangeElement.style.display = 'block' :
-            dateRangeElement.style.display = 'none'
-    }
-
-    //form set up
-    static setCalendarFormType(formType) {
-        if (formType.toLowerCase() === 'update')
-            document.querySelector('#eventAddOrUpdateButton').innerHTML = 'Update';
-        else if (formType.toLowerCase() === 'add')
-            document.querySelector('#eventAddOrUpdateButton').innerHTML = 'Add';
-        else
-            console.log(`Invalid form type: ${formType}`);
-    }
-
-    static setCalendarFormValues(formTitle, eventTitle, hour, minute, guid) {
-        document.querySelector('#eventId').value = guid;
-        document.querySelector('#formTitle').innerHTML = formTitle;
-        document.querySelector('#eventTitle').value = eventTitle
-        document.querySelector('#eventTitle').placeholder = 'title'
-
-        document.querySelector('#hour').value = CalendarHelper.padInt(hour, 2);
-        document.querySelector('#minute').value = CalendarHelper.padInt(minute, 2);
-
-        const year = DateHelper.getYear();
-        const month = CalendarHelper.padInt(DateHelper.getMonth() + 1, 2);
-        const day = CalendarHelper.padInt(DateHelper.getDay(), 2);
-
-        document.querySelector(`#eventFrom`).value = `${year}-${month}-${day}`;
-        document.querySelector(`#eventTo`).value = `${year}-${month}-${day}`;
-    }
-
-    static setCalendarFormPosition() {
-        const yOffset = window.pageYOffset;
-        const windowHeight = window.innerHeight;
-        const windowWidth = window.innerWidth;
-        const formWidth = '298';
-        const formHeight = '267.4';
-        const style = document.querySelector(`#${this.calendarFormId()}`).style;
-
-        style.top = `${yOffset + (windowHeight - formHeight) / 2}px`;
-        style.left = `${(windowWidth - formWidth) / 2}px`;
-    }
-
-    static closeCalendarForm(currentMonthRecords, refreshCallback) {
-        DataStore.setValue('currentMonthCalendarRecords', currentMonthRecords);
-        FormHelper.hideForm(this.calendarFormId());
-        refreshCallback();
+    multipleCalendarDaysRecordClick() {
+        this.calendarRecordDateRange.style.display = this.calendarRecordDateRange.style.display === 'none' ?
+            this.calendarRecordDateRange.style.display = 'block' :
+            this.calendarRecordDateRange.style.display = 'none'
     }
 }
