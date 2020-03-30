@@ -1,5 +1,3 @@
-import { DataStore } from './dataStore.js';
-
 export class CalendarRepo {
 
     static getBaseUrl() {

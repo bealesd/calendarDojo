@@ -4,6 +4,8 @@ import { CalendarHelper } from './calendarHelper.js';
 
 export class DrawCalendar {
     constructor() {
+        this.dateHelper = new DateHelper();
+
         this.opacity = 0.3;
         this.colors = ['#FF355E', '#FF6037', '#FFCC33', '#66FF66', '#50BFE6', '#FF00CC'];
         this.daysInMonth = null;
@@ -16,24 +18,23 @@ export class DrawCalendar {
 
     drawCalendar() {
         this.clearCalendar();
-        this.daysInMonth = DateHelper.getDaysInMonth();
-        this.drawCalendarEvents(DateHelper.getDaysNames());
+        this.daysInMonth = this.dateHelper.getDaysInMonth();
+        this.drawCalendarEvents(this.dateHelper.getDaysNames());
 
-        if (DateHelper.getTodaysDate().month === DateHelper.getMonth())
-            this.highlightCurrentDay(DateHelper.getTodaysDate().day);
+        if (this.dateHelper.getTodaysDate().month === this.dateHelper.currentMonth)
+            this.highlightCurrentDay(this.dateHelper.getTodaysDate().day);
 
         this.updateCalendarColors();
-        this.setMonthAndYearText(DateHelper.getMonth(), DateHelper.getMonthName(), DateHelper.getYear());
+        this.setMonthAndYearText(this.dateHelper.currentMonth, this.dateHelper.getMonthName(), this.dateHelper.currentYear);
         this.setCalendarBorder();
     }
 
     setCalendarBorder() {
-        const calendarContainer = document.getElementById('calendarContainer');
-        const blockWidth = document.getElementsByClassName('block')[0].offsetWidth;
+        const blockWidth = document.querySelector('.block').offsetWidth;
         const blockCount = this.countCalendarColumns();
         const totalBlockWidth = blockCount * blockWidth;
-        const gutter = (calendarContainer.parentNode.offsetWidth - totalBlockWidth) / 2;
-        calendarContainer.style.marginLeft = `${gutter}px`;
+        const gutter = (this.calendarContainer.parentNode.offsetWidth - totalBlockWidth) / 2;
+        this.calendarContainer.style.marginLeft = `${gutter}px`;
     }
 
     setMonthAndYearText(month, monthName, year) {
@@ -92,22 +93,14 @@ export class DrawCalendar {
 
     calculateBlockHeight() {
         const calendarArray = DataStore.getValue('currentMonthCalendarRecords');
-        let maxDaysCount = 0;
 
-        //populate daysInMonth
-        let daysCount = {};
+        let recordsByDay = {};
         for (let dayInMonth = 0; dayInMonth < this.daysInMonth; dayInMonth++) {
-            daysCount[dayInMonth] = 0;
+            recordsByDay[dayInMonth] = 0;
         }
+        calendarArray.forEach((record) => { recordsByDay[record.day]++; });
 
-        const calendarKeys = Object.keys(calendarArray);
-        for (let j = 0; j < calendarKeys.length; j++) {
-            daysCount[calendarArray[calendarKeys[j]].day]++;
-        }
-        for (let k = 0; k < Object.keys(daysCount).length; k++) {
-            if (daysCount[k] > maxDaysCount)
-                maxDaysCount = daysCount[k];
-        }
+        const maxDaysCount = Math.max(...Object.values(recordsByDay).filter((num) => { return num >= 0; }))
         return 80 + maxDaysCount * 10;
     }
 

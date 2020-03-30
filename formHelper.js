@@ -4,6 +4,8 @@ import { CalendarHelper } from './calendarHelper.js';
 
 export class FormHelper {
     constructor() {
+        this.dateHelper = new DateHelper();
+
         this.calendarRecordForm = document.querySelector('#addOrEditCalendarEvents');
         this.calendarRecordFormTitle = document.querySelector('#formTitle');
 
@@ -53,9 +55,10 @@ export class FormHelper {
         this.calendarRecordHour.value = CalendarHelper.padInt(hour, 2);
         this.calendarRecordMinute.value = CalendarHelper.padInt(minute, 2);
 
-        const year = DateHelper.getYear();
-        const month = CalendarHelper.padInt(DateHelper.getMonth() + 1, 2);
-        const day = CalendarHelper.padInt(DateHelper.getDay(), 2);
+        const year = this.dateHelper.currentYear;
+        //Month is 1 indexed when parsed in Date. yy-mm-dd.
+        const month = CalendarHelper.padInt(this.dateHelper.currentMonth + 1, 2);
+        const day = CalendarHelper.padInt(this.dateHelper.currentDay, 2);
 
         this.calendarRecordStartDate.value = `${year}-${month}-${day}`;
         this.calendarRecordEndDate.value = `${year}-${month}-${day}`;

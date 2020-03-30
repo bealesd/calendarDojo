@@ -9,6 +9,7 @@ export class CalendarEvents {
     constructor() {
         this.customEvents = new CustomEvents();
         this.formHelper = new FormHelper();
+        this.dateHelper = new DateHelper();
 
         this.calendarRecordForm = document.querySelector('#addOrEditCalendarEvents');
         this.calendarRecordFormTitle = document.querySelector('#formTitle');
@@ -53,7 +54,7 @@ export class CalendarEvents {
         this.calendarRecordDateRange.style.display = 'none';
 
         let day = event.srcElement.parentNode.dataset['day'];
-        DateHelper.setDay(day);
+        this.dateHelper.currentDay = day;
 
         this.formHelper.setCalendarFormType(FormHelper.FormType.add);
         this.formHelper.setCalendarFormValues(`Add event for day ${day}`, '', '10', '0', '', '', '');
@@ -68,7 +69,7 @@ export class CalendarEvents {
         this.calendarRecordMultipleDays.style.display = 'none';
         this.calendarRecordDateRange.style.display = 'none';
 
-        DateHelper.setDay(calendarRecord.day);
+        this.dateHelper.day = calendarRecord.day;
 
         this.formHelper.setCalendarFormType(FormHelper.FormType.update);
         this.formHelper.setCalendarFormValues(
@@ -143,7 +144,7 @@ export class CalendarEvents {
         const currentMonthRecords = DataStore.getValue('currentMonthCalendarRecords');
         const startDate = new Date(this.calendarRecordStartDate.value);
         const endDate = new Date(this.calendarRecordEndDate.value);
-        const dates = DateHelper.getDatesFromDateRange(startDate, endDate);
+        const dates = this.dateHelper.getDatesFromDateRange(startDate, endDate);
 
         for (let i = 0; i < dates.length; i++) {
             const year = dates[i].getFullYear();

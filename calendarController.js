@@ -10,24 +10,17 @@ export class CalendarController {
         this.calendarEvents = new CalendarEvents();
         this.calendarMenu = new CalendarMenu();
         this.drawCalendar = new DrawCalendar();
+        this.dateHelper = new DateHelper();
     }
 
     async main() {
-        this.setCurrentYearAndMonth();
         await this.loadCalendarPage();
-        this.calendarMenu.setCalendarMenu((isNextMonth) => {this.updateMonth(isNextMonth)});
+        this.calendarMenu.setCalendarMenu((isNextMonth) => { this.updateMonth(isNextMonth) });
         this.drawCalendar.setupCalendarFormTimePicker();
     }
 
-    setCurrentYearAndMonth() {
-        const year = DateHelper.getTodaysDate().year;
-        const month = DateHelper.getTodaysDate().month;
-        DataStore.setValue('year', year);
-        DataStore.setValue('month', month);
-    }
-
     async loadCalendarPage() {
-        let recordsArray = await CalendarRepo.getRecords(DateHelper.getYear(), DateHelper.getMonth());
+        let recordsArray = await CalendarRepo.getRecords(this.dateHelper.currentYear, this.dateHelper.currentMonth);
         DataStore.storeRecords(recordsArray);
 
         this.refreshCalendarPage();
@@ -48,7 +41,7 @@ export class CalendarController {
     }
 
     async updateMonth(isNextMonth) {
-        DateHelper.changeMonth(isNextMonth);
+        this.dateHelper.changeMonth(isNextMonth);
         await this.loadCalendarPage();
     }
 }
