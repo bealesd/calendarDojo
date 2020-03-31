@@ -53,7 +53,7 @@ export class DateHelper {
         let currentDate = startDate;
         while (currentDate <= endDate) {
             dateArray.push(new Date(currentDate));
-            currentDate = currentDate.setDate(currentDate.getDate() + 1);
+            currentDate.setDate(currentDate.getDate() + 1);
         }
         return dateArray;
     }
@@ -85,7 +85,7 @@ export class DateHelper {
         const daysInMonth = this.getDaysInMonth();
         let daysNames = new Array(daysInMonth);
         for (let dayInMonth = 1; dayInMonth <= daysInMonth; dayInMonth++) {
-            daysNames[dayInMonth] = Object.keys(DateHelper.DaysEnum)[dayInMonth % 7];
+            daysNames[dayInMonth] = Object.keys(DateHelper.DaysEnum).find(key => DateHelper.DaysEnum[key] === (dayInMonth % 7 === 0 ? DateHelper.DaysEnum.Saturday : dayInMonth % 7));
         }
         return daysNames;
     }

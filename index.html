@@ -19,7 +19,7 @@
 
     
     <div>
-        <img id="neonToggle" style='height:30px; padding-top: 5px;' class="" id="" src="./fonts/powerButton.svg">
+        <img style='height:30px; padding-top: 5px; display: none;' class="nenonToggle" id="" src="./fonts/powerButton.svg">
     </div>
 
     <div class="main calendar">
@@ -63,7 +63,7 @@
     </form>
 
     <script>
-        document.querySelector("#neonToggle").addEventListener("click", () => {
+        document.querySelector(".heading").addEventListener("click", () => {
             if (document.getElementsByClassName('heading')[0].classList.contains('headingAnimation'))
                 document.getElementsByClassName('heading')[0].classList.remove('headingAnimation');
             else

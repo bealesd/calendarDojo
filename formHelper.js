@@ -25,13 +25,9 @@ export class FormHelper {
         return formTypeEnum;
     }
 
-    hideForm() {
-        this.calendarRecordForm.style.display = 'none';
-    }
+    hideForm() { this.calendarRecordForm.style.display = 'none'; }
 
-    showForm() {
-        this.calendarRecordForm.style.display = 'block';
-    }
+    showForm() { this.calendarRecordForm.style.display = 'block'; }
 
     setCalendarFormType(formType) {
         switch (formType) {

@@ -11,7 +11,7 @@ export class DrawCalendar {
         this.daysInMonth = null;
 
         this.calendarContainer = document.querySelector('#calendarContainer');
-        this.calendarDate = document.getElementById("date");
+        this.calendarDate = document.querySelector("#date");
         this.calendarRecordHour = document.querySelector('#hour');
         this.calendarRecordMinute = document.querySelector('#minute');
     }
@@ -25,7 +25,7 @@ export class DrawCalendar {
             this.highlightCurrentDay(this.dateHelper.getTodaysDate().day);
 
         this.updateCalendarColors();
-        this.setMonthAndYearText(this.dateHelper.currentMonth, this.dateHelper.getMonthName(), this.dateHelper.currentYear);
+        this.setMonthAndYearText(this.dateHelper.getMonthName(), this.dateHelper.currentYear);
         this.setCalendarBorder();
     }
 
@@ -37,10 +37,8 @@ export class DrawCalendar {
         this.calendarContainer.style.marginLeft = `${gutter}px`;
     }
 
-    setMonthAndYearText(month, monthName, year) {
+    setMonthAndYearText(monthName, year) {
         this.calendarDate.innerHTML = `${monthName}  ${year}`;
-        DataStore.setValue('year', year);
-        DataStore.setValue('month', month);
     }
 
     setupCalendarFormTimePicker() {
@@ -65,23 +63,23 @@ export class DrawCalendar {
     }
 
     drawCalendarEvents(dayNames) {
-        const style = `style='height:${this.calculateBlockHeight()}px;'`;
+        const calendarBlockStyle = `style='height:${this.calculateBlockHeight()}px;'`;
 
         for (let day = 1; day <= this.daysInMonth; day++) {
-            const recordContainerNode =
-                `<div data-day='${day}' class='block' ${style}>` +
+            const calendarRecordContainerNode =
+                `<div data-day='${day}' class='block' ${calendarBlockStyle}>` +
                 `<p class='add'>${day} - ${dayNames[day]}</p>` +
                 `<table>` +
                 `<tbody>` +
                 `</tbody>` +
                 `</table>` +
                 `</div>`;
-            this.calendarContainer.innerHTML += recordContainerNode;
+            this.calendarContainer.innerHTML += calendarRecordContainerNode;
         }
 
-        const calendarArray = DataStore.getValue('currentMonthCalendarRecords');
-        for (let i = 0; i < calendarArray.length; i++) {
-            const calendarRecord = calendarArray[i];
+        const calendarRecords = DataStore.getValue('currentMonthCalendarRecords');
+        for (let i = 0; i < calendarRecords.length; i++) {
+            const calendarRecord = calendarRecords[i];
             const calendarRecordHtml = this.createCalendarDayRow(calendarRecord);
             document.querySelector(`[data-day='${calendarRecord["day"]}'] tbody`).innerHTML += calendarRecordHtml;
         }
@@ -92,13 +90,12 @@ export class DrawCalendar {
     }
 
     calculateBlockHeight() {
-        const calendarArray = DataStore.getValue('currentMonthCalendarRecords');
+        const calendarRecords = DataStore.getValue('currentMonthCalendarRecords');
 
-        let recordsByDay = {};
-        for (let dayInMonth = 0; dayInMonth < this.daysInMonth; dayInMonth++) {
-            recordsByDay[dayInMonth] = 0;
-        }
-        calendarArray.forEach((record) => { recordsByDay[record.day]++; });
+        const recordsByDay = {};
+        Array.apply(null, new Array(this.daysInMonth)).forEach((_, i)=>{recordsByDay[i] = 0})
+
+        calendarRecords.forEach((record) => { recordsByDay[record.day]++; });
 
         const maxDaysCount = Math.max(...Object.values(recordsByDay).filter((num) => { return num >= 0; }))
         return 80 + maxDaysCount * 10;
@@ -114,13 +111,12 @@ export class DrawCalendar {
     }
 
     updateCalendarColors() {
-        const calendarColumns = this.countCalendarColumns();
-        this.setCalendarColors(calendarColumns === 6 ? this.colors.slice(0, 5) : this.colors.slice(0, 6));
+        this.setCalendarColors(this.countCalendarColumns() === 6 ? this.colors.slice(0, 5) : this.colors.slice(0, 6));
     }
 
     countCalendarColumns() {
         const totalWidth = this.calendarContainer.parentNode.offsetWidth;
-        const blockWidth = document.getElementsByClassName('block')[0].offsetWidth;
+        const blockWidth = document.querySelector('.block').offsetWidth;
         return Math.floor(totalWidth / blockWidth);
     }
 
