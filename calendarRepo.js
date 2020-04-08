@@ -1,8 +1,8 @@
 export class CalendarRepo {
 
     static getBaseUrl() {
-        // return 'https://calservice.azurewebsites.net/'
-        return 'http://127.0.0.1:5000/events'
+        return 'https://calendarservicenodejs.azurewebsites.net/events'
+        // return 'http://localhost:8080/events'
     }
 
     static async getRecords(year, month) {
