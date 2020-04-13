@@ -81,11 +81,13 @@ export class DateHelper {
         //Month is 1 indexed when parsed in Date. yy-mm-dd.
         return new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     }
+
     getDaysNames() {
         const daysInMonth = this.getDaysInMonth();
         let daysNames = new Array(daysInMonth);
         for (let dayInMonth = 1; dayInMonth <= daysInMonth; dayInMonth++) {
-            daysNames[dayInMonth] = Object.keys(DateHelper.DaysEnum).find(key => DateHelper.DaysEnum[key] === (dayInMonth % 7 === 0 ? DateHelper.DaysEnum.Saturday : dayInMonth % 7));
+            const day = new Date(this.currentYear, this.currentMonth, dayInMonth).getDay();
+            daysNames[dayInMonth] = Object.keys(DateHelper.DaysEnum)[day%7]
         }
         return daysNames;
     }

@@ -7,7 +7,9 @@ export class CalendarMenu {
 
     setCalendarMenu(changeMonthCallabck) {
         this.onMainMenuLinkHover('calendar');
-        this.placeSubMenu(this.calendarSubMenuHtml());
+
+        this.calendarSubMenuHtml();
+
         this.onSubMenuLinkHover();
 
         this.customEvents.overwriteEvents('click', document.querySelector('#nextMonth'), () => {
@@ -19,16 +21,14 @@ export class CalendarMenu {
     }
 
     calendarSubMenuHtml() {
-        const height = window.getComputedStyle(document.querySelector('.navbar > a')).height;
+        const height = window.getComputedStyle(document.querySelector('.navbar')).height;
 
-        const previousMonthHtml = `<a style='height:${height}; background: url(./fonts/back.svg) no-repeat center;' class="calendar" id="previousMonth"></a>`;
-        const nextMonthHtml = `<a style='height:${height}; background: url(./fonts/next.svg) no-repeat center;' class="calendar" id="nextMonth"></a>`;
-        return previousMonthHtml + nextMonthHtml;
+        const previousMonthHtml = `<a style='height:${height};' id="previousMonth">backwards</a>`;
+        const nextMonthHtml = `<a style='height:${height};' id="nextMonth"> forwards</a>`;
+        document.querySelector('#subMenuLeft').innerHTML = previousMonthHtml;
+        document.querySelector('#subMenuRight').innerHTML = nextMonthHtml;
     }
 
-    placeSubMenu(subMenuHtml) {
-        document.querySelector('.subMenu').innerHTML = subMenuHtml;
-    }
 
     onSubMenuLinkHover() {
         document.querySelectorAll(`.subMenu > a`).forEach((link) => {
